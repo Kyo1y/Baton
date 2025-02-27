@@ -22,6 +22,7 @@ Currently, **transferring playlists from YouTube to Spotify is not working** due
 I am actively working on a solution utilizing **one of the major AI language models** (e.g., **ChatGPT, Claude, etc.**) to process YouTube song metadata, and match it with Spotify's catalog.
 
 The goal is to:
+
 ✅ Extract song titles and artist names from YouTube videos  
 ✅ Use AI models to match them with Spotify’s database  
 ✅ Improve accuracy and minimize mismatches  
