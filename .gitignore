@@ -1,0 +1,11 @@
+.env
+firebase_secrets.json
+client_secret_yt.json
+.cache
+test_fuzzy.py
+test_spotify_search.py
+test_yt_all_tracks.py
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
