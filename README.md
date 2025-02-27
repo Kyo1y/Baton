@@ -7,6 +7,7 @@ This Telegram bot allows users to transfer playlists between **Spotify** and **Y
 ## 📌 Features
 ✅ Transfer playlists from **Spotify to YouTube Music**  
 🚧 **YouTube to Spotify transfer is currently under development** (see [Known Issues](#-known-issues))
+
 ✅ Secure authentication using Firebase  
 ✅ Uses **Flask** for backend handling  
 
