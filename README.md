@@ -29,6 +29,11 @@ Stay tuned for updates on this feature! 🚀
 
 ---
 
+## ⚠️ Important Security Notice
+This project uses API keys and credentials that **must not** be exposed. Before running, create a `.env` file following `.env.example` and add your API keys.
+
+---
+
 ## 🚀 Installation
 
 ### 1️⃣ Clone the Repository
