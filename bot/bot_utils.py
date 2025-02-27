@@ -1,7 +1,16 @@
 from requests import get
 
 def sp_get_all_tracks(sp, playlist_id):
-    """Gets all tracks from a specified Spotify Playlist"""
+    """
+    Retrieves all tracks from a specified Spotify playlist.
+
+    Args:
+        sp (spotipy.Spotify): Authenticated Spotipy client.
+        playlist_id (str): The Spotify playlist ID.
+
+    Returns:
+        list: A list of track items from the playlist.
+    """
     all_tracks = []
     offset = 0
 
@@ -17,9 +26,20 @@ def sp_get_all_tracks(sp, playlist_id):
     return all_tracks
 
 def yt_get_all_tracks(yt_access_token, playlist_id):
+    """
+    Fetches all tracks from a given YouTube playlist.
+
+    Args:
+        yt_access_token (str): The YouTube OAuth access token.
+        playlist_id (str): The YouTube playlist ID.
+
+    Returns:
+        list: A list of tuples containing (video title, artist name).
+    """
     url = "https://www.googleapis.com/youtube/v3/playlistItems"
     next_page_token = None
     all_tracks = []
+
     while True:
         params = {
             "part": "snippet",
@@ -39,7 +59,7 @@ def yt_get_all_tracks(yt_access_token, playlist_id):
                 video_title = item['snippet']['title']
                 artist = item['snippet']['videoOwnerChannelTitle']
                 track = (video_title, artist)
-                all_tracks.append(track) 
+                all_tracks.append(track)
             next_page_token = data.get("nextPageToken")
 
             if not next_page_token:
@@ -50,6 +70,15 @@ def yt_get_all_tracks(yt_access_token, playlist_id):
     return all_tracks
 
 def yt_fetch_playlists(yt_access_token):
+    """
+    Retrieves a list of the user's YouTube playlists.
+
+    Args:
+        yt_access_token (str): The YouTube OAuth access token.
+
+    Returns:
+        list: A list of playlist objects, or None if request fails.
+    """
     url = "https://www.googleapis.com/youtube/v3/playlists"
 
     params = {
@@ -70,8 +99,14 @@ def yt_fetch_playlists(yt_access_token):
 
 def search_spotify_track(query, access_token):
     """
-    query:  search query string of the format: "<optional keyword> track: <track name> artist: <artist name>"
-    access_token:   usual OAuth access token
+    Searches for a track on Spotify.
+
+    Args:
+        query (str): Search query string in format "<optional keyword> track:<track name> artist:<artist name>"
+        access_token (str): Spotify OAuth access token.
+
+    Returns:
+        str: The Spotify track ID, or None if not found.
     """
     url = "https://api.spotify.com/v1/search"
     headers = {
@@ -91,4 +126,3 @@ def search_spotify_track(query, access_token):
     else:
         print(f"Error: {response.status_code}, {response.json()}")
         return None
-
