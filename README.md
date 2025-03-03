@@ -2,6 +2,8 @@
 
 This Telegram bot allows users to transfer playlists between **Spotify** and **YouTube Music** using **Firebase** for authentication and data storage.
 
+Search @TransferMusic_bot on Telegram to try it out!
+
 ---
 
 ## 📌 Features
