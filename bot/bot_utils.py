@@ -96,6 +96,7 @@ def yt_fetch_playlists(yt_access_token):
         return response.json().get("items", [])
     else:
         return None
+    
 
 def search_spotify_track(query, access_token):
     """

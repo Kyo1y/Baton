@@ -74,3 +74,34 @@ def sp_get_access_token(user_id):
             return None
     else:
         return root.child('users').child(f"{user_id}").child("spotify").child("access_token").get()
+
+
+def yt_get_access_token(user_id):
+    current_expiration_stamp = root.child('users').child(f"{user_id}").child("youtube").child("expires_at").get()
+    if int(time.time()) > current_expiration_stamp:
+        refresh_token = root.child('users').child(f"{user_id}").child("youtube").child('refresh_token').get()
+
+        url = "https://oauth2.googleapis.com/token"
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded"
+        }
+        data = {
+            "client_id": YOUTUBE_CLIENT_ID,
+            "client_secret": YOUTUBE_CLIENT_SECRET,
+            "grant_type": "refresh_token",
+            "refresh_token": refresh_token,
+        }
+
+        response = post(url, headers=headers, data=data)
+
+        if response.status_code == 200:
+            json_res = response.json()
+            expiration_stamp = int(time.time()) + json_res['expires_in']
+            access_token = json_res["access_token"]
+            save_tokens("spotify", user_id, access_token, refresh_token, expiration_stamp)
+            return access_token
+        else:
+            print(f"Error refreshing token: {response.status_code}")
+            return None
+    else:
+        return root.child('users').child(f"{user_id}").child("youtube").child("access_token").get()
