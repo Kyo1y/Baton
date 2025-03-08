@@ -3,7 +3,6 @@ from flask import Flask, request
 from database import firebase_utils
 import base64
 from requests import post
-import json
 import time
 from dotenv import load_dotenv
 

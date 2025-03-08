@@ -14,7 +14,8 @@ import threading
 from database import firebase_utils
 from requests import get
 from bot import bot_utils
-import json
+from spotipy.exceptions import SpotifyException
+import time
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -66,7 +67,6 @@ async def choice_handler(update: Update, context: CallbackContext):
     query = update.callback_query
     await query.answer()
     choice = query.data
-    print(f'Button clicked: {choice}')
     context.user_data['choice'] = choice
     return YOUTUBE_AUTH
 
@@ -92,7 +92,6 @@ async def youtube_playlists(update: Update, context: CallbackContext):
     # ask if you can call function like this
     yt_access_token = firebase_utils.yt_get_access_token(update.effective_user.id)
     playlists = bot_utils.yt_fetch_playlists(yt_access_token)
-    print(f"Playlists: {playlists}")
     if playlists is not None:
         keyboard = [
             [InlineKeyboardButton(p['snippet']['title'], callback_data=p['id'])] for p in playlists
@@ -157,30 +156,53 @@ async def spotify_playlist_chosen(update: Update, context: CallbackContext):
     return ADDING
 
 async def add_songs_to_spotify(update: Update, context: CallbackContext):
-    await update.callback_query.message.reply_text("Adding songs to your Spotify playlist...")
-    yt_playlist_id = context.user_data['youtube_playlist_id']
-    sp_playlist_id = context.user_data['spotify_playlist_id']
-    sp_access_token = firebase_utils.sp_get_access_token(update.effective_user.id)
-    yt_access_token = firebase_utils.yt_get_access_token(update.effective_user.id)
-    tracks = bot_utils.yt_get_all_tracks(yt_access_token, yt_playlist_id)
+    try:
+        await update.callback_query.message.reply_text("Adding songs to your Spotify playlist...")
+        yt_playlist_id = context.user_data['youtube_playlist_id']
+        sp_playlist_id = context.user_data['spotify_playlist_id']
+        tracks_ids = []
+        sp_access_token = firebase_utils.sp_get_access_token(update.effective_user.id)
+        yt_access_token = firebase_utils.yt_get_access_token(update.effective_user.id)
+        tracks = bot_utils.yt_get_all_tracks(yt_access_token, yt_playlist_id)
 
-    tracks_ids = []
+        if not sp_access_token or not yt_access_token:
+            await update.callback_query.message.reply_text("Authorization failed. Please reauthenticate.")
+            return ConversationHandler.END
 
-    for track in tracks:
-        print(track)
-        sp_track_id = bot_utils.search_spotify_track(f"track:{track[0]} artist:{track[1].replace(" - Topic", "")}", sp_access_token)
-        if sp_track_id is not None:
-            tracks_ids.append(sp_track_id)
-        else:
-            continue
-    
-    sp = spotipy.Spotify(auth=sp_access_token)
+        if not tracks:
+            await update.callback_query.message.reply_text("No tracks found in the YouTube playlist.")
+            return ConversationHandler.END
+        
+        for track in tracks:
+            try:
+                print(track)
+                sp_track_id = bot_utils.search_spotify_track(f"track:{track[0]} artist:{track[1]}", sp_access_token)
+                if sp_track_id is not None:
+                    tracks_ids.append(sp_track_id)
+                else:
+                    logger.warning(f"Track not found: {track}")
 
-    for track in tracks_ids:
-        sp.playlist_add_items(sp_playlist_id, f"spotify:track:{track}")
+            except Exception as e:
+                    logger.error(f"Error searching track '{track}': {e}")
 
-    await update.callback_query.message.reply_text("Songs have been added to your Spotify playlist!")
-    return ConversationHandler.END
+        sp = spotipy.Spotify(auth=sp_access_token)
+
+        for track_id in tracks_ids:
+            try:
+                time.sleep(1)
+                if bot_utils.sp_is_track_in_playlist(sp_playlist_id, track_id, sp):
+                    continue
+                else:
+                    sp.playlist_add_items(sp_playlist_id, [f"spotify:track:{track_id}"])
+            except SpotifyException as e:
+                logger.error(f"Failed to add track {track_id}: {e}")
+
+        await update.callback_query.message.reply_text("Songs have been added to your Spotify playlist!")
+        return ConversationHandler.END
+    except Exception as e:
+        logger.error(f"Unexpected error in add_songs_to_spotify: {e}")
+        await update.callback_query.message.reply_text("An unexpected error occurred. Please try again later.")
+        return ConversationHandler.END
 
 async def add_songs_to_youtube(update: Update, context: CallbackContext):
     # Fetch songs from Spotify playlist
@@ -193,36 +215,57 @@ async def add_songs_to_youtube(update: Update, context: CallbackContext):
 
     creds = Credentials(token=yt_access_token)
     youtube = build('youtube', 'v3', credentials=creds)
-    # Add songs to YouTube playlist
-    await update.callback_query.message.reply_text("Adding songs to your YouTube playlist...")
-    for track in tracks:
-        track_name = track['track']['name']
-        artists= [artist['name'] for artist in track['track']['artists']]
-        search_response = youtube.search().list(
-            q=f'{track_name} {', '.join(artists)}',
-            part='snippet',
-            maxResults=1,
-            type='video'
-        ).execute()
-        if search_response['items']:
-            video_id = search_response['items'][0]['id']['videoId']
-            youtube.playlistItems().insert(
+    if not sp_access_token or not yt_access_token:
+            await update.callback_query.message.reply_text("Authorization failed. Please reauthenticate.")
+            return ConversationHandler.END
+
+    if not tracks:
+        await update.callback_query.message.reply_text("No tracks found in the Spotify playlist.")
+        return ConversationHandler.END
+
+    try:
+        await update.callback_query.message.reply_text("Adding songs to your YouTube playlist...")
+        for track in tracks:
+            track_name = track['track']['name']
+            artists= [artist['name'] for artist in track['track']['artists']]
+            search_response = youtube.search().list(
+                q=f'{track_name} {', '.join(artists)}',
                 part='snippet',
-                body={
-                    'snippet': {
-                        'playlistId': context.user_data['youtube_playlist_id'],
-                        'resourceId': {
-                            'kind': 'youtube#video',
-                            'videoId': video_id
+                maxResults=1,
+                type='video'
+            ).execute()
+            if search_response['items']:
+                video_id = search_response['items'][0]['id']['videoId']
+                time.sleep(1)
+                youtube.playlistItems().insert(
+                    part='snippet',
+                    body={
+                        'snippet': {
+                            'playlistId': context.user_data['youtube_playlist_id'],
+                            'resourceId': {
+                                'kind': 'youtube#video',
+                                'videoId': video_id
+                            }
                         }
                     }
-                }
-            ).execute()
-    await update.callback_query.message.reply_text("Songs have been added to your YouTube playlist!")
-    return ConversationHandler.END
+                ).execute()
+            else:
+                logger.warning(f"Track not found: {track_name}")
+        await update.callback_query.message.reply_text("Songs have been added to your YouTube playlist!")
+        return ConversationHandler.END
+    except Exception as e:
+        logger.error(f"Unexpected error in add_songs_to_youtube: {e}")
+        await update.callback_query.message.reply_text("An unexpected error occurred. Please try again later.")
+        return ConversationHandler.END
 
 async def cancel(update: Update, context: CallbackContext):
-    await update.callback_query.message.reply_text('Operation cancelled.')
+    context.user_data.clear()
+    
+    if update.message:  # Ensure it's coming from a user message
+        await update.message.reply_text("Operation cancelled.")
+    else:
+        logger.warning("Cancel command received, but update.message is None.")
+
     return ConversationHandler.END
 
 def main():

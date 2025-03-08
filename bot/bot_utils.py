@@ -1,4 +1,9 @@
 from requests import get
+from openai import OpenAI
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 def sp_get_all_tracks(sp, playlist_id):
     """
@@ -57,9 +62,9 @@ def yt_get_all_tracks(yt_access_token, playlist_id):
             data = response.json()
             for item in data.get("items", []):
                 video_title = item['snippet']['title']
-                artist = item['snippet']['videoOwnerChannelTitle']
-                track = (video_title, artist)
-                all_tracks.append(track)
+                artist_title = item['snippet']['videoOwnerChannelTitle']
+                clean_track_title, clean_artist_name = track_title_normalization(video_title, artist_title)
+                all_tracks.append((clean_track_title, clean_artist_name))
             next_page_token = data.get("nextPageToken")
 
             if not next_page_token:
@@ -98,6 +103,20 @@ def yt_fetch_playlists(yt_access_token):
         return None
     
 
+def track_title_normalization(song_name, artist_name):
+    client = OpenAI()
+    client.api_key = os.getenv("OPENAI_API_KEY")
+    completion = client.chat.completions.create(
+        model="gpt-4o-mini",
+        store=True,
+        messages=[
+            {"role": "user", "content": f"Give me the official name of the song and artist's name for this song: '{song_name} by {artist_name}'. I need it for my search query for Spotify's API. Your response should only contain the name of the song and artist's name in this format: SongName - ArtistName. Never include featuring artists"}
+        ]
+    )
+    response = completion.choices[0].message.content
+    clean_song_name, clean_artist_name = map(str.strip, response.split("-", 1))
+    return clean_song_name, clean_artist_name
+
 def search_spotify_track(query, access_token):
     """
     Searches for a track on Spotify.
@@ -122,8 +141,19 @@ def search_spotify_track(query, access_token):
     response = get(url, headers=headers, params=params)
     if response.status_code == 200:
         data = response.json()
-        print(data)
-        return data['tracks']['items'][0]['id']
+        if data['tracks']['items']:
+            return data['tracks']['items'][0]['id']
+        else:
+            print(f"No results found for: {query}")
+            return None
     else:
         print(f"Error: {response.status_code}, {response.json()}")
         return None
+
+def sp_is_track_in_playlist(playlist_id, track_id, sp):
+    search_playlist = sp_get_all_tracks(sp, playlist_id)
+
+    for track in search_playlist:
+        if track_id == track["track"]["id"]:
+            return True
+    return False
