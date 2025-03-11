@@ -8,11 +8,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Load API credentials from environment variables
 SPOTIFY_CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
 SPOTIFY_CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
 YOUTUBE_CLIENT_ID = os.getenv("YOUTUBE_CLIENT_ID")
 YOUTUBE_CLIENT_SECRET = os.getenv("YOUTUBE_CLIENT_SECRET")
+firebase_utils_client = firebase_utils.FirebaseUtils()
 
 app = Flask(__name__)
 
@@ -52,7 +52,7 @@ def sp_exchange(platform, auth_code, user_id):
         access_token = json_res["access_token"]
         refresh_token = json_res["refresh_token"]
         expiration_stamp = int(time.time()) + json_res["expires_in"]
-        firebase_utils.save_tokens(platform, user_id, access_token, refresh_token, expiration_stamp)
+        firebase_utils_client.save_tokens(platform, user_id, access_token, refresh_token, expiration_stamp)
         print("Spotify token exchange successful")
     else:
         error_message = f"Error exchanging auth code: {response.status_code}, {response.content}"
@@ -94,7 +94,7 @@ def yt_exchange(platform, auth_code, user_id):
         access_token = tokens["access_token"]
         refresh_token = tokens["refresh_token"]
         expiration_stamp = int(time.time()) + tokens["expires_in"]
-        firebase_utils.save_tokens(platform, user_id, access_token, refresh_token, expiration_stamp)
+        firebase_utils_client.save_tokens(platform, user_id, access_token, refresh_token, expiration_stamp)
         print("YouTube token exchange successful")
     else:
         error_message = f"Error exchanging auth code: {response.status_code}, {response.content}, auth code used: {auth_code}"

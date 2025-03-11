@@ -6,6 +6,19 @@ import os
 load_dotenv()
 
 class BotUtils:
+    """
+    A utility class for handling Spotify and YouTube music-related operations.
+    
+    This class provides methods for:
+    - Retrieving all tracks from a Spotify or YouTube playlist.
+    - Fetching a user's YouTube playlists.
+    - Normalizing track titles for consistent API queries.
+    - Searching for tracks on Spotify.
+    - Checking if a track exists in a specific Spotify playlist.
+
+    Attributes:
+        client (OpenAI): An instance of the OpenAI API client.
+    """
     def __init__(self):
         self.client = OpenAI()
         self.client.api_key = os.getenv("OPENAI_API_KEY")

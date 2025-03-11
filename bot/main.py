@@ -18,7 +18,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Enable logging
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
@@ -26,24 +25,19 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-# Telegram Bot Token
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
-# Spotify Credentials
 SPOTIFY_CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
 SPOTIFY_CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
 SPOTIFY_REDIRECT_URI = os.getenv("SPOTIFY_REDIRECT_URI")
 
-# YouTube Credentials
 YOUTUBE_CLIENT_ID = os.getenv("YOUTUBE_CLIENT_ID")
 YOUTUBE_CLIENT_SECRET = os.getenv("YOUTUBE_CLIENT_SECRET")
 YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
 YOUTUBE_SCOPES = os.getenv("YOUTUBE_SCOPES")
 
-#Firebase Utilities Client
 firebase_utils_client = firebase_utils.FirebaseUtils()
 
-#Bot Utilities Client
 bot_utils_client = bot_utils.BotUtils()
 
 sp_oauth = SpotifyOAuth(
@@ -52,7 +46,6 @@ sp_oauth = SpotifyOAuth(
     redirect_uri=SPOTIFY_REDIRECT_URI,
     scope="playlist-read-private playlist-modify-public",
 )
-# Conversation states
 CHOOSING, YOUTUBE_PLAYLIST_CHOSEN, SPOTIFY_PLAYLIST_CHOSEN, YOUTUBE_PLAYLISTS, SPOTIFY_PLAYLISTS, SPOTIFY_AUTH, YOUTUBE_AUTH, ADDING = range(8)
 
 async def start(update: Update, context: CallbackContext):

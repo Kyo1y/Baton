@@ -18,5 +18,4 @@ def initialize_firebase():
     if not firebase_admin._apps:
         cred = credentials.Certificate(firebase_secrets_path)
         firebase_admin.initialize_app(cred, {'databaseURL': firebase_database_url})
-        print("Firebase initialized")
     return db.reference()
