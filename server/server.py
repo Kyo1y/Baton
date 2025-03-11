@@ -130,5 +130,5 @@ def callback():
         return "Error: Invalid platform specified."
 
 if __name__ == '__main__':
-    # Run the Flask server on port 8888
-    app.run(port=8888)
+    from waitress import serve
+    serve(app, host="0.0.0.0", port=8080)
