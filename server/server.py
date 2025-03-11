@@ -102,7 +102,7 @@ def yt_exchange(platform, auth_code, user_id):
 
 @app.errorhandler(404)
 def page_not_found(e):
-    return render_template("server/404.html"), 404
+    return render_template("404.html"), 404
 
 @app.route('/callback')
 def callback():
