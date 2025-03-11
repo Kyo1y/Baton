@@ -10,9 +10,7 @@ from spotipy.oauth2 import SpotifyOAuth
 from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
-import threading
 from database import firebase_utils
-from requests import get
 from bot import bot_utils
 from spotipy.exceptions import SpotifyException
 import time
@@ -41,6 +39,12 @@ YOUTUBE_CLIENT_ID = os.getenv("YOUTUBE_CLIENT_ID")
 YOUTUBE_CLIENT_SECRET = os.getenv("YOUTUBE_CLIENT_SECRET")
 YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
 YOUTUBE_SCOPES = os.getenv("YOUTUBE_SCOPES")
+
+#Firebase Utilities Client
+firebase_utils_client = firebase_utils.FirebaseUtils()
+
+#Bot Utilities Client
+bot_utils_client = bot_utils.BotUtils()
 
 sp_oauth = SpotifyOAuth(
     client_id=SPOTIFY_CLIENT_ID,
@@ -89,9 +93,8 @@ async def youtube_auth(update: Update, context: CallbackContext):
     
 
 async def youtube_playlists(update: Update, context: CallbackContext):
-    # ask if you can call function like this
-    yt_access_token = firebase_utils.yt_get_access_token(update.effective_user.id)
-    playlists = bot_utils.yt_fetch_playlists(yt_access_token)
+    yt_access_token = firebase_utils_client.get_access_token(update.effective_user.id, "youtube")
+    playlists = bot_utils_client.yt_fetch_playlists(yt_access_token)
     if playlists is not None:
         keyboard = [
             [InlineKeyboardButton(p['snippet']['title'], callback_data=p['id'])] for p in playlists
@@ -127,7 +130,7 @@ async def spotify_auth(update: Update, context: CallbackContext):
     return SPOTIFY_PLAYLISTS
 
 async def spotify_playlists(update: Update, context: CallbackContext):
-    access_token = firebase_utils.sp_get_access_token(update.effective_user.id)
+    access_token = firebase_utils_client.get_access_token(update.effective_user.id, "spotify")
     if access_token is None:
         update.callback_query.message.reply_text("Authorization failed. Please try again.")
         return ConversationHandler.END
@@ -161,9 +164,9 @@ async def add_songs_to_spotify(update: Update, context: CallbackContext):
         yt_playlist_id = context.user_data['youtube_playlist_id']
         sp_playlist_id = context.user_data['spotify_playlist_id']
         tracks_ids = []
-        sp_access_token = firebase_utils.sp_get_access_token(update.effective_user.id)
-        yt_access_token = firebase_utils.yt_get_access_token(update.effective_user.id)
-        tracks = bot_utils.yt_get_all_tracks(yt_access_token, yt_playlist_id)
+        sp_access_token = firebase_utils_client.get_access_token(update.effective_user.id, "spotify")
+        yt_access_token = firebase_utils_client.get_access_token(update.effective_user.id, "youtube")
+        tracks = bot_utils_client.yt_get_all_tracks(yt_access_token, yt_playlist_id)
 
         if not sp_access_token or not yt_access_token:
             await update.callback_query.message.reply_text("Authorization failed. Please reauthenticate.")
@@ -176,7 +179,7 @@ async def add_songs_to_spotify(update: Update, context: CallbackContext):
         for track in tracks:
             try:
                 print(track)
-                sp_track_id = bot_utils.search_spotify_track(f"track:{track[0]} artist:{track[1]}", sp_access_token)
+                sp_track_id = bot_utils_client.search_spotify_track(f"track:{track[0]} artist:{track[1]}", sp_access_token)
                 if sp_track_id is not None:
                     tracks_ids.append(sp_track_id)
                 else:
@@ -190,7 +193,7 @@ async def add_songs_to_spotify(update: Update, context: CallbackContext):
         for track_id in tracks_ids:
             try:
                 time.sleep(1)
-                if bot_utils.sp_is_track_in_playlist(sp_playlist_id, track_id, sp):
+                if bot_utils_client.sp_is_track_in_playlist(sp_playlist_id, track_id, sp):
                     continue
                 else:
                     sp.playlist_add_items(sp_playlist_id, [f"spotify:track:{track_id}"])
@@ -205,13 +208,12 @@ async def add_songs_to_spotify(update: Update, context: CallbackContext):
         return ConversationHandler.END
 
 async def add_songs_to_youtube(update: Update, context: CallbackContext):
-    # Fetch songs from Spotify playlist
     playlist_id = context.user_data['spotify_playlist_id']
-    sp_access_token = firebase_utils.sp_get_access_token(update.effective_user.id)
-    yt_access_token = firebase_utils.yt_get_access_token(update.effective_user.id)
+    sp_access_token = firebase_utils_client.get_access_token(update.effective_user.id, "spotify")
+    yt_access_token = firebase_utils_client.get_access_token(update.effective_user.id, "youtube")
 
     sp = spotipy.Spotify(auth=sp_access_token)
-    tracks = bot_utils.sp_get_all_tracks(sp, playlist_id)
+    tracks = bot_utils_client.sp_get_all_tracks(sp, playlist_id)
 
     creds = Credentials(token=yt_access_token)
     youtube = build('youtube', 'v3', credentials=creds)
@@ -261,7 +263,7 @@ async def add_songs_to_youtube(update: Update, context: CallbackContext):
 async def cancel(update: Update, context: CallbackContext):
     context.user_data.clear()
     
-    if update.message:  # Ensure it's coming from a user message
+    if update.message:
         await update.message.reply_text("Operation cancelled.")
     else:
         logger.warning("Cancel command received, but update.message is None.")
@@ -271,7 +273,6 @@ async def cancel(update: Update, context: CallbackContext):
 def main():
     app = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
 
-    # Define the conversation handler
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler('start', start)],
         states={
@@ -301,16 +302,14 @@ def main():
                     lambda update, context: add_songs_to_spotify(update, context)
                     if context.user_data['choice'] == 'y_to_s'
                     else add_songs_to_youtube(update, context)
-                ),  # Perform song transfer
+                ),  
             ],
         },
         fallbacks=[CommandHandler('cancel', cancel)]
     )
 
-    # Add the conversation handler to the application
     app.add_handler(conv_handler)
 
-    # Start polling
     app.run_polling()
 
 if __name__ == '__main__':
