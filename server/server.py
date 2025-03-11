@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request
+from flask import Flask, request, render_template
 from database import firebase_utils
 import base64
 from requests import post
@@ -99,6 +99,10 @@ def yt_exchange(platform, auth_code, user_id):
     else:
         error_message = f"Error exchanging auth code: {response.status_code}, {response.content}, auth code used: {auth_code}"
         print(error_message)
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template("server/404.html"), 404
 
 @app.route('/callback')
 def callback():
