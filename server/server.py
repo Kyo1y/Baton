@@ -100,6 +100,10 @@ def yt_exchange(platform, auth_code, user_id):
         error_message = f"Error exchanging auth code: {response.status_code}, {response.content}, auth code used: {auth_code}"
         print(error_message)
 
+@app.route('/')
+def index():
+    return render_template("index.html")
+
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template("404.html"), 404

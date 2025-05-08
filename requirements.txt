@@ -1,18 +1,16 @@
+# runtime
 Flask==3.1.0
-google-api-core==2.24.0
-google-api-python-client==2.156.0
-google-auth==2.37.0
-google-auth-httplib2==0.2.0
-google-auth-oauthlib==1.2.1
-google-cloud-core==2.4.1
-google-cloud-firestore==2.19.0
-google-cloud-storage==2.19.0
-google-crc32c==1.6.0
-google-resumable-media==2.7.2
-googleapis-common-protos==1.66.0
-openai==1.65.4
-python-dotenv==1.0.1
+gunicorn==23.0.0
+python-telegram-bot==20.7
 spotipy==2.25.0
+openai==1.65.4
 requests==2.31.0
 firebase-admin==6.6.0
-gunicorn==23.0.0
+google-api-python-client==2.156.0
+google-auth==2.37.0
+google-auth-oauthlib==1.2.1
+python-dotenv==1.0.1
+
+# only if you *really* use them directly
+google-cloud-firestore==2.19.0
+google-cloud-storage==2.19.0
