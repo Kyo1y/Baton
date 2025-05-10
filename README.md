@@ -7,9 +7,7 @@ Search @TransferMusic_bot on Telegram to try it out!
 ---
 
 ## 📌 Features
-✅ Transfer playlists from **Spotify to YouTube Music**  
-🚧 **YouTube to Spotify transfer is currently under development** (see [Known Issues](#-known-issues))
-
+✅ Transfer playlists from **Spotify to YouTube Music** and  from **YouTube Music to Spotify**
 ✅ Secure authentication using Firebase  
 ✅ Uses **Flask** for backend handling  
 
@@ -18,18 +16,10 @@ Search @TransferMusic_bot on Telegram to try it out!
 ## 🛑 Known Issues
 
 ### ❌ YouTube to Spotify Transfer Currently Unavailable
-Currently, **transferring playlists from YouTube to Spotify is not working** due to YouTube’s complex data storage structure. Unlike Spotify, which provides structured metadata access via its API, YouTube does not expose a standardized way to extract song metadata reliably.
+Telegram Inline Buttons: callback queries aren’t acknowledged, so the client spinner never clears and users must click each button multiple times.
 
 ### 🔧 Solution in Development
-I am actively working on the development of a small NLP model to process YouTube song metadata, and match it with Spotify's catalog.
-
-The goal is to:
-
-✅ Extract song titles and artist names from YouTube videos  
-✅ Use AI models to match them with Spotify’s database  
-✅ Improve accuracy and minimize mismatches  
-
-Stay tuned for updates on this feature! 🚀
+Add await query.answer() at the start of every callback handler to immediately clear the Telegram inline‑button spinner, and refactor the choice handler to invoke the correct auth step directly for a true one‑click flow.
 
 ---
 
