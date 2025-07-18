@@ -68,6 +68,8 @@ async def choice_handler(update: Update, context: CallbackContext):
     return YOUTUBE_AUTH
 
 async def youtube_auth(update: Update, context: CallbackContext):
+    query = update.callback_query
+    await query.answer()
     user_id = update.effective_user.id
     flow = Flow.from_client_secrets_file(
         "client_secret_yt.json",

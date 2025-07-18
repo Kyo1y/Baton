@@ -8,3 +8,4 @@ client_secret_yt.json
 *.log
 .venv
 .vscode
+myenv
