@@ -35,3 +35,12 @@ This project uses API keys and credentials that **must not** be exposed. Before 
 ```sh
 git clone https://github.com/Kyo1y/MusicExp.git
 cd your-repo
+
+---
+
+## How To Run
+
+### 0 Create Virtual Environment
+
+### 1️⃣ Install requirements
+pip install -r requirements.txt

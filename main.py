@@ -65,7 +65,10 @@ async def choice_handler(update: Update, context: CallbackContext):
     await query.answer()
     choice = query.data
     context.user_data['choice'] = choice
-    return YOUTUBE_AUTH
+    if query.data == 's_to_y':
+        return await spotify_auth(update, context)
+    else:
+        return await youtube_auth(update, context)
 
 async def youtube_auth(update: Update, context: CallbackContext):
     query = update.callback_query
@@ -88,6 +91,8 @@ async def youtube_auth(update: Update, context: CallbackContext):
     
 
 async def youtube_playlists(update: Update, context: CallbackContext):
+    query = update.callback_query
+    await query.answer()
     yt_access_token = firebase_utils_client.get_access_token(update.effective_user.id, "youtube")
     playlists = bot_utils_client.yt_fetch_playlists(yt_access_token)
     if playlists is not None:
@@ -122,7 +127,7 @@ async def spotify_auth(update: Update, context: CallbackContext):
         reply_markup=reply_markup,
     )
 
-    return SPOTIFY_PLAYLISTS
+    return await spotify_playlists(update, context)
 
 async def spotify_playlists(update: Update, context: CallbackContext):
     access_token = firebase_utils_client.get_access_token(update.effective_user.id, "spotify")
@@ -140,8 +145,13 @@ async def spotify_playlists(update: Update, context: CallbackContext):
             [InlineKeyboardButton(p['name'], callback_data=p['id'])] for p in playlists
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
+        message = ''
+        if context.user_data['choice'] == 's_to_y':
+            message = "Select a playlist to transfer:"
+        else:
+            message = "Select where to import:"
         await update.callback_query.message.reply_text(
-            "Select a playlist to transfer:",
+            message,
             reply_markup=reply_markup
         )
         return SPOTIFY_PLAYLIST_CHOSEN
