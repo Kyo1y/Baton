@@ -6,6 +6,7 @@ client_secret_yt.json
 *.pyo
 .DS_Store
 *.log
-.venv
+venv
 .vscode
 myenv
+node_modules
