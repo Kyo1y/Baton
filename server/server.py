@@ -47,7 +47,7 @@ def sp_exchange(platform, auth_code, user_id):
     }
 
     response = post(url, headers=headers, data=data)
-    if response.status_code == 200:
+    if response.ok:
         json_res = response.json()
         access_token = json_res["access_token"]
         refresh_token = json_res["refresh_token"]
@@ -89,7 +89,7 @@ def yt_exchange(platform, auth_code, user_id):
 
     response = post(url, headers=headers, data=data)
 
-    if response.status_code == 200:
+    if response.ok:
         tokens = response.json()
         access_token = tokens["access_token"]
         refresh_token = tokens["refresh_token"]

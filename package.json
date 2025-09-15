@@ -3,13 +3,12 @@
   "version": "1.0.0",
   "description": "This Telegram bot allows users to transfer playlists between **Spotify** and **YouTube Music** using **Firebase** for authentication and data storage.",
   "main": "index.js",
-  
+  "workspaces": ["baton_frontend", "packages/*"],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "dev:web": "npm --workspace baton_frontend run dev",
-    "db:migrate": "npm --workspace @baton/db run migrate",
-    "db:studio": "npm --workspace @baton/db run studio",
-    "gen": "npm --workspace baton_frontend run db:generate"
+    "db:generate": "prisma generate --schema packages/db/prisma/schema.prisma",
+    "db:studio": "prisma studio --schema packages/db/prisma/schema.prisma",
+    "postinstall": "npm run db:generate"
   },
   "repository": {
     "type": "git",
@@ -25,6 +24,6 @@
   "homepage": "https://github.com/Kyo1y/Baton#readme",
   "private": true,
   "dependencies": {
-    "@prisma/client": "^6.13.0"
+    "prisma": "6.14.0"
   }
 }

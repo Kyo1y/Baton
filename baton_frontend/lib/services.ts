@@ -7,6 +7,6 @@ export type Service = {
 }
 
 export const SERVICES: Service[] = [
-  { name: "Spotify", logo: "/logos/spotify-big.png", slug: "spotify", width: 120, height: 120},
-  { name: "YouTube Music", logo: "/logos/ytmusic.svg", slug:"youtube-music", width: 160, height: 160 },
+  { name: "Spotify", logo: "/logos/spotify-big.png", slug: "spotify", width: 140, height: 10},
+  { name: "YouTube Music", logo: "/logos/ytmusic.svg", slug:"ytmusic", width: 180, height: 10 },
 ]

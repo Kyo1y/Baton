@@ -7,7 +7,8 @@ export const NAV_PUBLIC: NavLink[] = [
 
 export const NAV_AUTH: NavLink[] = [
     { label:'Transfer', href:'/transfer' },
-    { label:'Dashboard', href:'/dashboard' }
+    { label:'Dashboard', href:'/dashboard' },
+    { label: 'User Info', href:'/user-info'}
 ];
 
 export function buildNav({ isAuthed }: { isAuthed: boolean }) {

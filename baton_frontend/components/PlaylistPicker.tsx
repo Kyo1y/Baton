@@ -1,0 +1,99 @@
+"use client";
+import { Playlist } from "@/integrations/types";
+import { useMemo, useState } from "react";
+import * as Separator from "@radix-ui/react-separator";
+import PlaylistsGrid from "./PlaylistsGrid";
+import { useSessionStorage } from "@/lib/useSessionStorage";
+
+type Props = {
+    source: string,
+    dest: string,
+    userId: string,
+    sourcePlaylists: Playlist[],
+    destPlaylists: Playlist[],
+}
+
+export default function PlaylistPicker( { source, dest, userId, sourcePlaylists, destPlaylists}: Props ) {
+    const [selectedSourceId, setSelectedSourceId] = useState<string | null>(null);
+    const [selectedDestId, setSelectedDestId] = useState<string | null>(null);
+    const [draftDest, setDraftDest] = useSessionStorage<Playlist | null>(`draft:${userId}:${dest}`, null);
+    const [draftName, setDraftName] = useState<string | null>(null);
+    const [draftPublic, setDraftPublic] = useState<boolean | null>(null);
+
+
+    const destList = useMemo(
+        () => (draftDest ? [...destPlaylists, draftDest] : destPlaylists),
+        [draftDest, destPlaylists]
+    )   
+
+    function addDraftPlaylist(name: string, isPublic: boolean, url: string) {
+        setDraftDest( {
+            id: "__draft__",
+            name,
+            thumbnail: { url, width:30, height:30 },
+            isPublic,
+        } as any);
+        setSelectedDestId("__draft__");
+    }
+
+    return (
+        <>
+            <section id="playlist-pick" >
+                <div className="flex flex-col justify-center items-center gap-7 p-[2rem]">
+                    <div className="flex flex-col justify-center items-center gap-2">
+                        <h1 
+                        className="text-balance font-bold tracking-tight
+                        text-xl sm:text-2xl md:text-3xl">
+                            Choose the source and destination playlists.
+                        </h1>
+                        <p className="text-center text-balance max-w-prose text-base text-md sm:text-lg text-muted-foreground">
+                            You may also create a new playlist in the destination provider if you don't see the one you want.
+                        </p>
+                    </div>
+                    <div className="grid grid-cols-[auto_5rem_auto]">
+                        <div id="sourcePlaylists" className="flex items-center w-full">
+                            <PlaylistsGrid 
+                                playlists={sourcePlaylists}
+                                source={source}
+                                dest={dest}
+                                onChange={setSelectedSourceId}
+                                selectedPlaylistId={selectedSourceId}
+                            />
+                        </div>
+                        <div id="separator" className="relative flex mx-4 h-full justify-center items-center">
+                            <Separator.Root
+                            orientation="vertical"
+                            decorative
+                            className="h-full w-px bg-border"
+                            />
+                            <span
+                                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2
+                                        rounded-full border bg-background px-2 py-0.5 text-[10px] font-medium
+                                        text-muted-foreground shadow-sm"
+                            >
+                                TO
+                            </span>
+                        </div>
+                        <div id="destPlaylists" className="flex items-center mx-auto w-full md:max-w-lg">
+                            <PlaylistsGrid 
+                                playlists={destList}
+                                source={source}
+                                dest={dest}
+                                onChange={setSelectedDestId}
+                                selectedPlaylistId={selectedDestId}
+                                isDest={true}
+                                addDraftPlaylist={addDraftPlaylist}
+                                draftName={draftName}
+                                setDraftName={setDraftName}
+                                setDraftPublic={setDraftPublic}
+                                draftPublic={draftPublic}
+                                draftDest={draftDest}
+                                
+                            />
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </>
+    )
+}

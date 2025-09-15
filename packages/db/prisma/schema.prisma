@@ -22,6 +22,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   telegramId    String?    @unique
+  integrationTokens IntegrationToken[]
 }
 
 model Account {
@@ -50,10 +51,40 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model VerificationToken {
-  identifier String
-  token      String   @unique
-  expires    DateTime
+model IntegrationToken {
+  id                String   @id @default(cuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider          String   
+  access_token      String
+  refresh_token     String
+  expires_at        Int    
+  providerAccountId String?  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
-  @@unique([identifier, token])
+  @@unique([userId, provider])
+}
+
+model TrackExternalId {
+  id          String         @id @default(cuid())
+  canonicalId String
+  provider    String
+  externalId  String
+  canonical   CanonicalTrack @relation(fields: [canonicalId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, externalId])
+  @@unique([canonicalId, provider])
+}
+
+model CanonicalTrack {
+  id          String  @id @default(cuid())
+  isrc        String? @unique
+  title       String
+  artists     String[]
+  durationMs  Int
+  altKey      String
+  externalIds TrackExternalId[]
+
+  @@unique([altKey])
 }

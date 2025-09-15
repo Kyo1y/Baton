@@ -1,9 +1,12 @@
-import auth, { authOptions } from "@/auth";
+import { authOptions } from "@/auth";
 import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
 import Image from "next/image"
 
 export default async function UserInfo() {
     const session = await getServerSession(authOptions);
+    if (!session) redirect("/api/auth/signin?callbackUrl=/user-info");
+
     return (
         <>
             <div style={{display: "flex"}}>

@@ -13,8 +13,9 @@ export default async function Home() {
     return (
       <>
       <div style={{display: "flex", flexDirection: "column"}}>
-        <Link href="/user-info">User Info</Link>    
+        <Link href="/user-info">User Info</Link>
         <SignOutBtn />
+        <HomeIntro />
       </div>
       </>
     );

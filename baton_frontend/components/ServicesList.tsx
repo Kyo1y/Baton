@@ -10,16 +10,16 @@ export default function ServicesList() {
                 {SERVICES.map((service) => (
                     <Link 
                     key={service.slug}
-                    href={`/transfer/${service.slug}`}
+                    href={`/transfer`}
                     aria-label={`Start transfer with ${service.name}`}
                     >
-                        <div className="flex bg-[#F1F1F1] p-3 h-auto w-auto items-center justify-center rounded-lg">
+                        <div className="flex bg-[#F1F1F1] p-2 h-auto w-auto items-center justify-center rounded-[1.25rem]">
                             <Image
                                 src={service.logo}
                                 alt={service.name}
                                 width={service.width}
                                 height={service.height}
-                                className="object-contain"
+                                className={`!h-${service.height} object-contain`}
                             />
                         </div>
                     </Link>

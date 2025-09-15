@@ -9,6 +9,8 @@ const nextConfig: NextConfig = {
     remotePatterns: [
     { protocol: "https", hostname: "avatars.githubusercontent.com" },
     { protocol: "https", hostname: "*.googleusercontent.com" },
+    { protocol: "https", hostname: "mosaic.scdn.co" },
+    { protocol: "https", hostname: "i.ytimg.com"},
   ],
   },
 };

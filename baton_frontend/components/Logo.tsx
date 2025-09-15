@@ -11,7 +11,7 @@ export function LogoMark({
       viewBox="0 0 177 122"
       aria-hidden="true"
       className={
-        "h-20 w-20 [&>path]:transition-colors [&>path]:fill-transparent " +
+        "h-20 w-20 [&>path]:transition-colors [&>path]:fill-transparent" +
         className
       }
       {...props}
