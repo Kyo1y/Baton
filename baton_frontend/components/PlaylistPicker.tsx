@@ -4,6 +4,10 @@ import { useMemo, useState } from "react";
 import * as Separator from "@radix-ui/react-separator";
 import PlaylistsGrid from "./PlaylistsGrid";
 import { useSessionStorage } from "@/lib/useSessionStorage";
+import { Button } from "./ui/button";
+import { useRouter } from "next/navigation";
+import clsx from "clsx";
+import { saveTransferDraft } from "@/app/(actions)/saveTransferDraft";
 
 type Props = {
     source: string,
@@ -16,11 +20,12 @@ type Props = {
 export default function PlaylistPicker( { source, dest, userId, sourcePlaylists, destPlaylists}: Props ) {
     const [selectedSourceId, setSelectedSourceId] = useState<string | null>(null);
     const [selectedDestId, setSelectedDestId] = useState<string | null>(null);
+    // kill draft from storage after transfer is complete/failed/etc.
     const [draftDest, setDraftDest] = useSessionStorage<Playlist | null>(`draft:${userId}:${dest}`, null);
-    const [draftName, setDraftName] = useState<string | null>(null);
-    const [draftPublic, setDraftPublic] = useState<boolean | null>(null);
-
-
+    const router = useRouter();
+    const transferReady = selectedSourceId && selectedDestId;
+    const toCompletion = `/transfer/${encodeURIComponent(source)}/${encodeURIComponent(dest)}/completion`;
+    const toDestPicker = `/transfer/${encodeURIComponent(source)}`;
     const destList = useMemo(
         () => (draftDest ? [...destPlaylists, draftDest] : destPlaylists),
         [draftDest, destPlaylists]
@@ -35,10 +40,23 @@ export default function PlaylistPicker( { source, dest, userId, sourcePlaylists,
         } as any);
         setSelectedDestId("__draft__");
     }
+    async function onTransfer() {
+        const srcPlaylistName = sourcePlaylists.find(p => p.id === selectedSourceId)!.name;
+        const destPlaylistName = destList.find(p => p.id === selectedDestId)!.name;
+        await saveTransferDraft({
+            userId, source, dest, 
+            srcPlaylistId: selectedSourceId!, 
+            destPlaylistId: selectedDestId!, 
+            srcPlaylistName,
+            destDraft: draftDest ? { name: draftDest.name, isPublic: draftDest.isPublic, } : null,
+            destPlaylistName: draftDest ? null : destPlaylistName,
+        })
+        router.push(toCompletion);
 
+    }
     return (
         <>
-            <section id="playlist-pick" >
+            <section id="playlist-pick">
                 <div className="flex flex-col justify-center items-center gap-7 p-[2rem]">
                     <div className="flex flex-col justify-center items-center gap-2">
                         <h1 
@@ -83,14 +101,35 @@ export default function PlaylistPicker( { source, dest, userId, sourcePlaylists,
                                 selectedPlaylistId={selectedDestId}
                                 isDest={true}
                                 addDraftPlaylist={addDraftPlaylist}
-                                draftName={draftName}
-                                setDraftName={setDraftName}
-                                setDraftPublic={setDraftPublic}
-                                draftPublic={draftPublic}
                                 draftDest={draftDest}
-                                
                             />
                         </div>
+                    </div>
+                    <div className="flex gap-2">
+                        <Button
+                            type="button"
+                            className={
+                                    `flex flex-col cursor-pointer border bg-[#CDCDCD] hover:bg-[#CDCDCD] 
+                                    text-black h-auto w-auto items-center justify-center 
+                                    rounded-xl overflow-x-auto`
+                                }
+                            onClick={() => router.push(toDestPicker)}>
+                                Back
+                        </Button>
+                        <Button
+                            type="button"
+                            disabled={!transferReady}
+                            className={clsx(
+                                    "flex flex-col border bg-[#CDCDCD] p-1.5 hover:bg-[#CDCDCD] text-muted-foreground h-auto w-auto items-center justify-center rounded-xl overflow-x-auto",
+                                    transferReady ?
+                                        "bg-[#F8831E] p-1.5 border-[#F8831E] hover:bg-[#fc953d] text-white cursor-pointer"
+                                        : ""
+                                )}
+                                //onTransfer or onTransfer()?
+                            onClick={() => { onTransfer() }} 
+                        >
+                            Transfer
+                        </Button>
                     </div>
                 </div>
             </section>

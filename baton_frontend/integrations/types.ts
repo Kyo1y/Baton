@@ -3,7 +3,7 @@ export type Playlist = {
     name: string, 
     thumbnail: { url: string, width: number, height: number},
     owner?: string,
-    isPublic?: boolean,
+    isPublic: boolean,
 }
 
 type IdProviderPair = {
@@ -25,7 +25,7 @@ export interface MusicAdapter {
     listPlaylists(userId: string): Promise<Page<Playlist>>;
     listPlaylistTracks(userId: string, playlistId: string, cursor?: string | null): Promise<Page<Track>>;
     listAllPlaylistTracks(userId: string, playlistId: string, startCursor?: string, ): Promise<Track[]>;
-    createPlaylist(userId: string, name: string, publicParam: boolean): Promise<void>;
-    addTracks(userId: string, playlistId: string, tracks: Track[]): Promise<void>;
+    createPlaylist(userId: string, name: string, publicParam: boolean): Promise<string>;
+    addTracks(userId: string, playlistId: string, tracks: Track[]): Promise<Track[]>;
     fetchTrack(t: Track, access: string): Promise<any>;
 }

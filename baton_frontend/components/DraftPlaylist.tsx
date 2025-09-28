@@ -11,26 +11,37 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import clsx from "clsx";
 import { toast } from "sonner";
+import { Playlist } from "@/integrations/types"
 
 type DraftPlaylistProps = {
     url: string,
     addDraftPlaylist: (name: string, privacy: boolean, url: string) => void,
     open?: boolean,
-    onOpenChange?: (open: boolean) => void;
+    onOpenChange?: (open: boolean) => void,
+    draftDest?: Playlist | null,
 }
 
 export function DraftPlaylist({
     url,
     addDraftPlaylist,
     open,
-    onOpenChange
+    onOpenChange,
+    draftDest
 }: DraftPlaylistProps) {
     const [internalOpen, setInternalOpen] = useState<boolean>(false);
     const [isPublic, setIsPublic] = useState<boolean | null>(false);
     const [draftName, setDraftName] = useState<string | null>(null);
+    
+    useEffect(() => {
+        if (draftDest) {
+            const existingDraftName = draftDest.name.slice(3);
+            setIsPublic(draftDest.isPublic ?? null);
+            setDraftName(existingDraftName ?? null);
+        }
+    }, [draftDest]);
 
     const nameRef = useRef<HTMLInputElement>(null);
     const isControlled = open !== undefined;
@@ -59,7 +70,7 @@ export function DraftPlaylist({
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogTrigger asChild>
-          <Button variant="outline" className="text-[#F8831E]">+</Button>
+          <Button variant="outline" className="text-[#F8831E] w-[90%] mx-auto cursor-pointer hover:text-[#F8831E]">+</Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>

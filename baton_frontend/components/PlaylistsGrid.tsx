@@ -3,7 +3,7 @@ import { Button } from "./ui/button";
 import Image from "next/image";
 import clsx from "clsx";
 import { DraftPlaylist } from "./DraftPlaylist";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PencilLine } from 'lucide-react';
 
 type Props = { 
@@ -14,32 +14,62 @@ type Props = {
     selectedPlaylistId: string | null, 
     isDest?: boolean, 
     addDraftPlaylist?: (name: string, isPublic: boolean, url: string) => void, 
-    draftName?: string | null, 
-    setDraftName?: (v: string | null) => void, 
-    draftPublic?: boolean | null, 
-    setDraftPublic?: (v: boolean | null) => void, 
     draftDest?: Playlist | null,
 }
 
 export default function PlaylistsGrid({
-    playlists, source, dest, onChange, selectedPlaylistId, isDest, addDraftPlaylist, draftName, draftPublic, setDraftName, setDraftPublic, draftDest
+    playlists, source, dest, onChange, selectedPlaylistId, isDest, addDraftPlaylist, draftDest
 }: Props ) {
     const [draftOpen, setDraftOpen] = useState(false);
-    const [nameError, setNameError] = useState<string | null>(null);
     const sourceImgSrc = `/${source}_playlist_thumbnail.svg`;
     const destImgSrc = `/${dest}_playlist_thumbnail.svg`;
-
+    const isDraft = draftDest != null;
+    let nRows;
+    useEffect(() => {
+        nRows = playlists.length;
+    }, [playlists.length]);
     return (
-        <div className={clsx(`grid`, isDest ? `grid-rows-${playlists.length+1}` : ` grid-rows-${playlists.length}`)}>
+        <div className={`grid grid-rows-${nRows}`}>
             {playlists.map((p) => {
                 const isServiceSelected = selectedPlaylistId === p.id;
                 const dummyImage = isDest ? destImgSrc : sourceImgSrc;
+                if (p.id === "__draft__") {
+                    return (
+                        <div key={p.id} className={`flex flex-row`}>
+                            <Button  onClick={() => onChange(isServiceSelected ? null : p.id )} 
+                            className= {clsx(
+                                `rounded-none cursor-pointer border-l-1 border-b-1 border-r-1 border-black border-solid rounded-b-lg bg-transparent shadow-none
+                            hover:bg-[#F3F3F3] w-full md:max-w-[13rem]`,
+                            isServiceSelected ? "bg-[#F8831E] hover:bg-[#F8831E] text-white" : "bg-transparent"
+                            )} >
+                                <div className="flex items-center w-full">
+                                    <Image 
+                                        src={p.thumbnail?.url ?? dummyImage}
+                                        alt="thumbnail"
+                                        width={30}
+                                        height={30}
+                                    />
+                                    <div className="flex justify-center w-full">
+                                        <p className={clsx(`truncate w-[90%]`, isServiceSelected ? "text-white" : "text-black")}>{p.name}</p>
+                                    </div>
+                                    {isServiceSelected && (
+                                        <div onClick={() => setDraftOpen(true)} className="cursor-pointer px-2 z-20 max-h-[20px] max-w-[20px] bg-transparent hover:bg-transparent">
+                                            <PencilLine onClick={() => setDraftOpen(true)}/>
+                                        </div>)
+                                    }
+                                </div>
+                            </Button>
+                            
+                        </div>
+                        
+                    )
+                }
                 return (
                     <Button key={p.id} onClick={() => onChange(isServiceSelected ? null : p.id )} 
                     className= {clsx(
                         `rounded-none cursor-pointer first:rounded-t-lg 
-                    last:rounded-b-lg bg-transparent shadow-none  border-solid border-black
-                    hover:bg-[#F3F3F3] w-full md:max-w-[13rem]`,
+                    last:rounded-b-lg bg-transparent shadow-none border-l-1 border-r-1 border-b-1 border-black border-solid first:border-t-1
+                    hover:bg-[#F3F3F3] w-full md:max-w-[13rem] md:min-w-[13rem] `,
                     isServiceSelected ? "bg-[#F8831E] hover:bg-[#F8831E] text-white" : "bg-transparent"
                     )} >
                         <div className="flex items-center w-full">
@@ -52,25 +82,20 @@ export default function PlaylistsGrid({
                             <div className="flex justify-center w-full">
                                 <p className={clsx(`truncate w-[90%]`, isServiceSelected ? "text-white" : "text-black")}>{p.name}</p>
                             </div>
-                            {p.id === "__draft__" && isServiceSelected && (
-                                <Button onClick={() => setDraftOpen(true)} className="cursor-pointer max-h-[20px] max-w-[10px]  border-black bg-transparent hover:bg-transparent">
-                                    <PencilLine />
-                                </Button>
-                            )}
                         </div>
                     </Button>
                 )
             })}
             {isDest && (
-                <div className={clsx(draftDest ? `hidden` : ``)}>
+                <div className={clsx(isDraft ? `hidden` : `flex items-center`)}>
                     <DraftPlaylist 
                         addDraftPlaylist={addDraftPlaylist!}
                         url={destImgSrc}
                         open={draftOpen}
                         onOpenChange={setDraftOpen}
+                        draftDest={draftDest}
                     /> 
                 </div>
-                
             )}
             
         </div>

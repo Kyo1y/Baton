@@ -1,0 +1,10 @@
+/*
+  Warnings:
+
+  - You are about to drop the column `destDraft` on the `TransferDraft` table. All the data in the column will be lost.
+
+*/
+-- AlterTable
+ALTER TABLE "public"."TransferDraft" DROP COLUMN "destDraft",
+ADD COLUMN     "destDraftIsPublic" BOOLEAN,
+ADD COLUMN     "destDraftName" TEXT;

@@ -1,7 +1,6 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/auth";
 import { redirect } from "next/navigation";
-import { getAdapter } from "@/integrations/registry";
 import { listPlaylistsCached } from "@/lib/cachedPlaylists";
 import requireIntegration from "@/lib/requireIntegration";
 import PlaylistPicker from "@/components/PlaylistPicker";
@@ -23,12 +22,9 @@ export default async function StepThree( { params }: { params: Promise<{ dest: s
         listPlaylistsCached(userId, dest),
         listPlaylistsCached(userId, content)
     ])
-    // const sourceProvider = getAdapter(dest);
-    // const destProvider = getAdapter(content);
-    // const sourcePlaylists = await sourceProvider.listPlaylists(userId);
-    // const destPlaylists = await destProvider.listPlaylists(userId);
-
     
+    
+
     return (
         <PlaylistPicker 
             source={dest}

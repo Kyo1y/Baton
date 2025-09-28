@@ -83,8 +83,37 @@ model CanonicalTrack {
   title       String
   artists     String[]
   durationMs  Int
-  altKey      String
+  altKey      String?
   externalIds TrackExternalId[]
 
   @@unique([altKey])
+}
+
+enum TransferStatus {
+  RUNNING
+  SUCCESS
+  PARTIAL
+  FAILED
+  CANCELED
+}
+
+model TransferDraft {
+  id                String   @id @default(cuid())
+  userId            String   
+  source            String
+  dest              String
+  srcPlaylistId     String
+  destPlaylistId    String
+  srcPlaylistName   String
+  destDraftName     String?
+  destDraftIsPublic Boolean?
+  destPlaylistName  String?
+  status            TransferStatus @default(RUNNING)
+  added             Int @default(0)
+  failed            Int @default(0)
+  errorMessage      String?
+  createdAt         DateTime @default(now())
+
+  @@index([userId, source, dest])
+  @@index([userId, status, createdAt])
 }

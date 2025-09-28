@@ -106,7 +106,7 @@ export const spotifyAdapter: MusicAdapter = {
         )
         const playlistsJson = await res.json();
         const playlists = playlistsJson.items.map((p: any): Playlist => ({
-            id: p.id, name: p.name, thumbnail: p.images?.[1], owner: p.owner.display_name
+            id: p.id, name: p.name, thumbnail: p.images?.[1], owner: p.owner.display_name, isPublic: p.public
         }))
         const sameNameIdx = checkDuplicatePlaylistNames(playlists);
         sameNameIdx.forEach((i) => {
@@ -119,10 +119,10 @@ export const spotifyAdapter: MusicAdapter = {
         }
     },
     async listPlaylistTracks(userId: string, playlistId: string, cursor?: string): Promise<Page<Track>> {
-        const access = ensureAccessToken(userId, "spotify");
-        const url = cursor ?? new URL(`${API}/v1/playlists/${playlistId}/tracks?limit=50`);
+        const access = await ensureAccessToken(userId, "spotify");
+        const url = cursor ?? new URL(`${API}/playlists/${playlistId}/tracks?limit=50`);
+        console.log(access)
         const res = await fetch(
-            // TODO: check if /me/* works
             url, { 
                 headers: { Authorization: `Bearer ${access}` },
                 cache: "no-store"
@@ -195,7 +195,7 @@ export const spotifyAdapter: MusicAdapter = {
             }
         }
     },
-    async addTracks(userId, playlistId, tracks) {
+    async addTracks(userId, playlistId, tracks): Promise<Track[]> {
         const access = await ensureAccessToken(userId, "spotify");
         const ids: string[] = [];
 
@@ -250,11 +250,12 @@ export const spotifyAdapter: MusicAdapter = {
             }
         }
         const uniqueIds = [...new Set(ids)];
-
+        let failedCounter = 0;
         for (let i = 0; i < uniqueIds.length; i += 100) {
             const batch = uniqueIds.slice(i, i+100);
             const res = await fetch(
                 `${API}/playlists/${playlistId}/tracks`, {
+                    method: "POST",
                     headers: { 
                         Authorization: `Bearer ${access}`,
                         'Content-Type': 'application/json'
@@ -262,12 +263,22 @@ export const spotifyAdapter: MusicAdapter = {
                     body: JSON.stringify({uris: batch.map(id => `spotify:track:${id}`)})
                 }
             )
+            if (!res.ok) {
+                failedCounter++;
+            }
         }
+        return [{
+            title: "failed transfers",
+            artists: [],
+            durationMs: failedCounter * 100,
+            pairs: []
+        }];
     },
-    async createPlaylist(userId: string, name: string, publicParam: boolean) {
+    async createPlaylist(userId: string, name: string, publicParam: boolean): Promise<string> {
         const access = await ensureAccessToken(userId, "spotify");
         const res = await fetch(
             `${API}/me/playlists`, {
+                method: "POST",
                 headers: {
                     Authorization: `Bearer ${access}`,
                     'Content-Type': 'application/json',
@@ -278,12 +289,13 @@ export const spotifyAdapter: MusicAdapter = {
                 })
             }
         )
-        if (res) {
+        if (res.ok) {
             const playlist = await res.json();
             return playlist.id;
         }
         else {
-            console.log("Could not create playlist");
+            const resjson = await res.json();
+            return resjson.status;
         }
     }
 }
