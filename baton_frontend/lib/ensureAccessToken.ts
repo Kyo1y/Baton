@@ -1,6 +1,7 @@
 import { OAUTH } from "@/integrations/providers";
 import { prisma } from "./prisma";
-import requireIntegration from "./requireIntegration";
+import { redirect } from "next/navigation";
+
 
 async function readErr(r: Response) {
   try { return await r.json(); } catch { return { error: await r.text() }; }
@@ -18,6 +19,7 @@ async function cachedToken( userId: string, provider: string) {
     if (row.expires_at > now + 60) return row.access_token;
 }
 
+// ADD REFRESH TOKEN VALIDATOR
 export default async function ensureAccessToken(userId: string, provider: string) {
     const row = await prisma.integrationToken.findUnique({
         where: { userId_provider: { userId, provider } },
@@ -25,7 +27,7 @@ export default async function ensureAccessToken(userId: string, provider: string
     });
 
     if (!row) {
-        throw new Error("MISSING TOKEN: might be requireIntegration faulter")
+        redirect(`/api/oauth/${provider}/start?return_to=/transfer`);
     }
     const now = Math.floor(Date.now() / 1000);
     if (row.expires_at > now + 60) return row.access_token;
@@ -50,7 +52,12 @@ export default async function ensureAccessToken(userId: string, provider: string
     });
     if (!tokenResp.ok) {
         const err = await readErr(tokenResp);
-        throw new Error(`TOKEN_REFRESH_FAILED ${tokenResp.status}: ${JSON.stringify(err)}`);
+        if (tokenResp.status === 400) {
+            redirect(`/api/oauth/${provider}/start?return_to=/transfer`);
+        }
+        else {
+            throw new Error(`TOKEN_REFRESH_FAILED ${tokenResp.status}: ${JSON.stringify(err)}`);
+        }
     }
     const tokenJson = await tokenResp.json() as {access_token: string, refresh_token?: string, expires_in: number}
     const newAccessToken = tokenJson.access_token;

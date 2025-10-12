@@ -89,6 +89,40 @@ export async function GET(request: Request, { params }: {params: Promise<{ provi
 
     const expires_at = Math.floor(Date.now() / 1000) + (tokenJson.expires_in ?? 3600);
 
+    const profileRow = await prisma.providerProfile.findUnique({
+        where: { userId_provider: { userId, provider } }
+    })
+
+    if (profileRow === null) {
+        const ytUrl = "https://www.googleapis.com/oauth2/v1/userinfo?alt=json";
+        const spotifyUrl = "https://api.spotify.com/v1/me";
+
+        const profileRes = await fetch(
+            provider == "ytmusic" ? ytUrl : spotifyUrl, {
+                headers: {
+                    Authorization: `Bearer ${tokenJson.access_token}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        )
+        const profileJson = await profileRes.json();
+        const profile = {
+            id: profileJson.id,
+            image: provider == "ytmusic" ? profileJson.picture : profileJson.images[0].url,
+            display_name: provider == "ytmusic" ? profileJson.name : profileJson.display_name ?? `${provider} username`,
+        }
+        await prisma.providerProfile.create({
+            data: {
+                userId,
+                provider,
+                providerId: profile.id,
+                username: profile.display_name,
+                image: profile.image,
+            }
+        })
+    }
+
+
     await prisma.integrationToken.upsert({
         where: { userId_provider: { userId, provider: provider} },
         update: {

@@ -12,7 +12,7 @@ export const OAUTH: Record<string, OAuthProviderConfig> = {
     "spotify": {
         authorizeUrl: "https://accounts.spotify.com/authorize",
         tokenUrl: "https://accounts.spotify.com/api/token",
-        scopes: ["playlist-read-private", "playlist-modify-private", "user-library-read", "user-library-modify"],
+        scopes: ["playlist-read-private", "playlist-modify-private", "user-library-read", "user-library-modify", "playlist-modify-public"],
         clientId: process.env.SPOTIFY_CLIENT_ID!,
         usePKCE: true,
         mapTokenResponse: j => ({
@@ -24,7 +24,7 @@ export const OAUTH: Record<string, OAuthProviderConfig> = {
     "ytmusic": {
         authorizeUrl: "https://accounts.google.com/o/oauth2/v2/auth",
         tokenUrl: "https://oauth2.googleapis.com/token",
-        scopes: ["https://www.googleapis.com/auth/youtube.force-ssl"],
+        scopes: ["https://www.googleapis.com/auth/youtube.force-ssl", "https://www.googleapis.com/auth/userinfo.profile"],
         clientId: process.env.YOUTUBE_CLIENT_ID!,
         clientSecret: process.env.YOUTUBE_CLIENT_SECRET!,
         usePKCE: true,

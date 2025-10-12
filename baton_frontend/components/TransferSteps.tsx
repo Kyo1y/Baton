@@ -17,7 +17,7 @@ function computeCurrent(pathname: string): number {
   if (depth <= 1) return 1;
   if (depth === 2) return 2;
   if (depth === 3) return 3;
-  if (depth === 4) return 4;
+  if (depth >= 4) return 4;
   return 1;
 }
 

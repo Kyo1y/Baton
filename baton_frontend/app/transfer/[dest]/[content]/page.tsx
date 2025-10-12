@@ -22,8 +22,6 @@ export default async function StepThree( { params }: { params: Promise<{ dest: s
         listPlaylistsCached(userId, dest),
         listPlaylistsCached(userId, content)
     ])
-    
-    
 
     return (
         <PlaylistPicker 

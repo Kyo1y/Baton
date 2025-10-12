@@ -40,6 +40,6 @@ export default async function TransferContent( {params}: { params: Promise<{ des
     
 
     return (
-        <TransferRunner transferDraft={newTransfer} source={dest} dest={content} />
+        <TransferRunner transferDraft={newTransfer} source={dest} dest={content} userId={userId} />
     )
 }

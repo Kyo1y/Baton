@@ -1,6 +1,6 @@
 "use client";
 import { Playlist } from "@/integrations/types";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import * as Separator from "@radix-ui/react-separator";
 import PlaylistsGrid from "./PlaylistsGrid";
 import { useSessionStorage } from "@/lib/useSessionStorage";
@@ -20,8 +20,7 @@ type Props = {
 export default function PlaylistPicker( { source, dest, userId, sourcePlaylists, destPlaylists}: Props ) {
     const [selectedSourceId, setSelectedSourceId] = useState<string | null>(null);
     const [selectedDestId, setSelectedDestId] = useState<string | null>(null);
-    // kill draft from storage after transfer is complete/failed/etc.
-    const [draftDest, setDraftDest] = useSessionStorage<Playlist | null>(`draft:${userId}:${dest}`, null);
+    const [draftDest, setDraftDest, removeDraft] = useSessionStorage<Playlist | null>(`draft:${userId}:${dest}`, null, 5 * 60 * 1000);
     const router = useRouter();
     const transferReady = selectedSourceId && selectedDestId;
     const toCompletion = `/transfer/${encodeURIComponent(source)}/${encodeURIComponent(dest)}/completion`;
@@ -29,10 +28,11 @@ export default function PlaylistPicker( { source, dest, userId, sourcePlaylists,
     const destList = useMemo(
         () => (draftDest ? [...destPlaylists, draftDest] : destPlaylists),
         [draftDest, destPlaylists]
-    )   
-
+    )
+    console.log(draftDest)
     function addDraftPlaylist(name: string, isPublic: boolean, url: string) {
-        setDraftDest( {
+        console.log("DRAFT PL NAME",name)
+        setDraftDest({
             id: "__draft__",
             name,
             thumbnail: { url, width:30, height:30 },
@@ -43,13 +43,17 @@ export default function PlaylistPicker( { source, dest, userId, sourcePlaylists,
     async function onTransfer() {
         const srcPlaylistName = sourcePlaylists.find(p => p.id === selectedSourceId)!.name;
         const destPlaylistName = destList.find(p => p.id === selectedDestId)!.name;
+        const draftSelected = selectedDestId === "__draft__";
+        if (!draftSelected) {
+            removeDraft();
+        }
         await saveTransferDraft({
             userId, source, dest, 
             srcPlaylistId: selectedSourceId!, 
             destPlaylistId: selectedDestId!, 
             srcPlaylistName,
-            destDraft: draftDest ? { name: draftDest.name, isPublic: draftDest.isPublic, } : null,
-            destPlaylistName: draftDest ? null : destPlaylistName,
+            destDraft: draftSelected && draftDest ? { name: draftDest.name, isPublic: draftDest.isPublic, } : null,
+            destPlaylistName: draftSelected && draftDest ? null : destPlaylistName,
         })
         router.push(toCompletion);
 

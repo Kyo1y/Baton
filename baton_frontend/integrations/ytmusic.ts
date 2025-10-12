@@ -60,7 +60,7 @@ function itemizeTracks(tracks: any): Track[] {
 
 async function addIdToRow(t: Track, access: string, rowId: string): Promise<string> {
     const track = await ytmusicAdapter.fetchTrack(t, access);
-    const id = track.id;
+    const id = track.ytmusicId;
     await prisma.trackExternalId.upsert({
         where: { canonicalId_provider: {canonicalId: rowId, provider: "ytmusic"} },
         update: { externalId: id },
@@ -95,10 +95,10 @@ async function createPair(t: Track, access: string, isrcParam?: string, altKeyPa
         create: {
             canonicalId: canonical.id,
             provider: "ytmusic",
-            externalId: track.id,
+            externalId: track.ytmusicId,
         },
         update: {
-            externalId: track.id
+            externalId: track.ytmusicIid
         },
         select: {externalId: true}
     })
@@ -187,10 +187,13 @@ export const ytmusicAdapter: MusicAdapter = {
     async createPlaylist(userId: string, name: string, publicParam: boolean): Promise<string> {
         const access = await ensureAccessToken(userId, "ytmusic");
         const url = new URL(`${API}/playlists`);
-        url.search = (new URLSearchParams({part: "id"})).toString();
+        url.searchParams.set("part", "snippet, status");
+        url.searchParams.set("fields", "id");
         const body = {
-            snippet: { title: name },
-            status: { privacyStatus: publicParam ? "public" : "private" },
+            snippet: { 
+                title: name,
+                privacyStatus: publicParam ? "public" : "private",
+             },
         }
         const res = await fetch(
             url, {
@@ -208,13 +211,34 @@ export const ytmusicAdapter: MusicAdapter = {
 
         return playlist.id;
     },
-    async addTracks(userId: string, playlistId: string, tracks: Track[]): Promise<Track[]> {
+    async trackAlreadyExists(targetTrackId: string, targetPlaylist: Track[]): Promise<boolean> {
+        for (const track of targetPlaylist) {
+            if (track.pairs[0].id === targetTrackId) {
+                return true
+            }
+        }
+        return false;
+    },
+    async addTracks(userId: string, playlistId: string, tracks: Track[]): Promise<[Track[], number]> {
         const access = await ensureAccessToken(userId, "ytmusic");
         const url = new URL(`${API}/playlistItems`);
         const failed: Track[] = [];
+        let copies: number = 0;
         url.search = (new URLSearchParams({ part: "snippet, status"})).toString();
-        for (const t of tracks) {
+        for (let t of tracks) {
             let id: string | null = null;
+            // const normArtistTitle = await normalizeGPT(t.title, t.artists[0]);
+            const normArtist = normalizeArtist(t.artists[0]);
+            const normTitle = normalizeTitle(t.title);
+            const normTrack: Track = {
+                title: normTitle,
+                artists: [normArtist],
+                isrc: t.isrc,
+                durationMs: t.durationMs,
+                pairs: t.pairs,
+            }
+            t = normTrack;
+            
             // check if Track includes ISRC
             if (t.isrc) {
                 const row = await findRow(t.isrc, "");
@@ -256,6 +280,12 @@ export const ytmusicAdapter: MusicAdapter = {
                     id = await createPair(t, access, undefined, altKey);
                 }
             }
+            const targetPlaylistTracks = await this.listAllPlaylistTracks(userId, playlistId);
+            const alreadyExists = await this.trackAlreadyExists(id, targetPlaylistTracks);
+            if (alreadyExists) {
+                copies++;
+                continue;
+            }
             const body = { 
                 snippet: {
                     "playlistId": `${playlistId}`,
@@ -270,17 +300,7 @@ export const ytmusicAdapter: MusicAdapter = {
                     body: JSON.stringify(body),
                 }
             )
-            if (res.ok) {
-                const resJson = await res.json();
-                const trackSnippet = resJson.snippet;
-                failed.push({
-                    title: trackSnippet.title, 
-                    artists: trackSnippet.videoOwnerChannelTitle, 
-                    durationMs: 0,
-                    pairs: trackSnippet.resourceId.videoId,
-                });
-            }
-            else {
+            if (!res.ok) {
                 failed.push({
                     title: t.title, 
                     artists: t.artists, 
@@ -289,13 +309,10 @@ export const ytmusicAdapter: MusicAdapter = {
                 });
             }
         }
-        return failed;
+        return [failed, copies];
     },
     async fetchTrack(t: Track, access: string): Promise<any> {
-        // add openai normalization
         const url = new URL(`${API}/search`);
-        const normalizedTrack = await normalizeGPT(t.title, t.artists[0])
-        
         url.search = new URLSearchParams({
             part: "snippet",
             q: `${ t.title } ${ t.artists[0] }`.trim(),
@@ -316,6 +333,7 @@ export const ytmusicAdapter: MusicAdapter = {
         const first = data.items[0];
 
         const id = first.id.videoId;
+        console.log(`--------AT FETCHTRACK MV ID: ${id}`)
         const title = first.snippet.title;
         const artist = normalizeArtist(first.snippet.videoOwnerChannelTitle)
         return {

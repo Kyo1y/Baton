@@ -4,14 +4,16 @@ import { finalizeTransfer } from "@/app/(actions)/finalizeTransfer"; // returns 
 import { useRouter } from "next/navigation";
 import type { TransferDraft } from "@prisma/client";
 import { useState, useEffect } from "react";
+import { useSessionStorage } from "@/lib/useSessionStorage";
+import type { Playlist } from "@/integrations/types";
 
-type Props = { transferDraft: TransferDraft; source: string; dest: string };
+type Props = { transferDraft: TransferDraft; source: string; dest: string; userId: string };
 
-export default function TransferRunner({ transferDraft, source, dest }: Props) {
+export default function TransferRunner({ transferDraft, source, dest, userId }: Props) {
   const router = useRouter();
-  const [status, setStatus] = useState<"idle"|"running"|"success"|"partial"|"failed">("idle");
+  const [status, setStatus] = useState<"running"|"success"|"partial"|"failed">("running");
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<{ added: number; unmatched: number } | null>(null);
+  const [result, setResult] = useState<{ added: number; unmatched: number, copies: number, destPlaylistName: string, srcPlaylistName: string } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -20,12 +22,16 @@ export default function TransferRunner({ transferDraft, source, dest }: Props) {
         setStatus("running");
         const res = await finalizeTransfer(transferDraft);
         if (cancelled) return;
-        setResult({ added: res.added, unmatched: res.failed });
+        setResult({ added: res.added, unmatched: res.failed, copies: res.copies, destPlaylistName: res.destPlaylistName, srcPlaylistName: res.srcPlaylistName});
         setStatus(res.failed ? "partial" : "success");
-      } catch (e: any) {
+        sessionStorage.removeItem(`draft:${userId}:${dest}`);
+      }
+      catch (e: any) {
         if (cancelled) return;
         setError(e?.message ?? "Transfer failed.");
         setStatus("failed");
+        sessionStorage.removeItem(`draft:${userId}:${dest}`);
+        
       }
     })();
     return () => { cancelled = true; };
@@ -49,12 +55,17 @@ export default function TransferRunner({ transferDraft, source, dest }: Props) {
   );
 }
 
-function SuccessView({ source, dest, result, note }: { source: string; dest: string; result: {added:number; unmatched:number}; note?: string }) {
+function SuccessView({ source, dest, result, note }: { 
+  source: string; dest: string; 
+  result: { added: number; unmatched: number, copies: number, destPlaylistName: string, srcPlaylistName: string }; 
+  note?: string 
+}) {
   return (
     <div>
       <h1 className="text-2xl font-semibold">Transfer complete</h1>
       {note && <p className="mt-1 text-sm text-muted-foreground">{note}</p>}
-      <p className="mt-4">Added {result.added} tracks. Unmatched: {result.unmatched}.</p>
+      <h2>{result.srcPlaylistName} → {result.srcPlaylistName}</h2>
+      <p className="mt-4">Added {result.added} tracks. Unmatched: {result.unmatched}. Copies avoided: {result.copies}</p>
       <a className="mt-4 inline-block underline" href={`/transfer/${source}/${dest}`}>Start another</a>
     </div>
   );
