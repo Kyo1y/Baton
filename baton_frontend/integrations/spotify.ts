@@ -7,18 +7,34 @@ import normalizeGPT from "@/lib/openai";
 const API = "https://api.spotify.com/v1";
 
 async function findRow(isrcParam: string | null, altKeyParam: string) {
-    const method = isrcParam ? { isrc: isrcParam } : { altKey: altKeyParam}
-    const row = await prisma.canonicalTrack.findUnique({
-        where: method,
+    if (isrcParam) {
+        const row = await prisma.canonicalTrack.findUnique({
+        where: { isrc: isrcParam },
         select: {
             id: true,
             externalIds: {
-                where: {provider: "spotify"},
-                select: {externalId: true}
+                    where: {provider: "spotify"},
+                    select: {externalId: true}
+                }
             }
+        })
+        if (row) {
+            return row;
         }
-    })
-    return row;
+        if (!row && altKeyParam !== "") {
+            const row = await prisma.canonicalTrack.findUnique({
+            where: { altKey: altKeyParam },
+            select: {
+                id: true,
+                externalIds: {
+                        where: {provider: "spotify"},
+                        select: {externalId: true}
+                    }
+                }
+            });
+            return row;
+        }
+    }
 }
 
 async function addIdToRow(t: Track, access: string, rowId: string): Promise<string> {
@@ -32,6 +48,16 @@ async function addIdToRow(t: Track, access: string, rowId: string): Promise<stri
         update: { externalId: id },
         create: { canonicalId: rowId, provider: "spotify", externalId: id }
     })
+    const isrcExists = await prisma.canonicalTrack.findFirst({
+        where: { id: rowId },
+        select: { isrc: true }
+    })
+    if (!isrcExists || !isrcExists.isrc) {
+        await prisma.canonicalTrack.updateMany({
+            where: { id: rowId, isrc: null },
+            data: { isrc: track.isrc },
+        })
+    }
     return id;
 }
 
@@ -44,8 +70,8 @@ async function createPair(t: Track, access: string, isrcParam?: string, altKeyPa
         title: t.title,
         artists: t.artists,
         durationMs: 0,
-        ...(isrcParam ? { isrc: isrcParam } : {}),
-        ...(!isrcParam && altKeyParam ? {altKey: altKeyParam} : {}),
+        isrc: isrcParam,
+        altKey: altKeyParam,
     }
 
     const canonical = await prisma.canonicalTrack.upsert({
@@ -63,7 +89,7 @@ async function createPair(t: Track, access: string, isrcParam?: string, altKeyPa
     if (track.isrc && !canonical.isrc) {
         await prisma.canonicalTrack.update({
             where: { id: canonical.id },
-            data: { isrc: track.isrc, altKey: null }
+            data: { isrc: track.isrc }
         })
     }
     const externalid = await prisma.trackExternalId.upsert({
@@ -227,10 +253,12 @@ export const spotifyAdapter: MusicAdapter = {
                 pairs: t.pairs,
             }
             t = normTrack;
+            const altKey = makeAltKey(t.title, t.artists, 0);
             const targetPlaylist = await this.listAllPlaylistTracks(userId, playlistId);
+
             // check if Track includes ISRC
             if (t.isrc) {
-                const row = await findRow(t.isrc, "");
+                const row = await findRow(t.isrc, altKey);
                 // check if row exists for current ISRC
                 if (row) {
                     const spotifyId = row.externalIds[0]?.externalId ?? null;
@@ -271,7 +299,7 @@ export const spotifyAdapter: MusicAdapter = {
                 } 
                 // if row does not exist, create canonical track for that ISRC
                 else {
-                    id = await createPair(t, access, t.isrc);
+                    id = await createPair(t, access, t.isrc, altKey);
                     if (id == "404") {
                         failed.push({
                             title: t.title,
@@ -294,9 +322,8 @@ export const spotifyAdapter: MusicAdapter = {
             }
             // if not, lookup by altKey (hash of title+artist+duration)
             else {
-                const altKey = makeAltKey(t.title, t.artists, t.durationMs);
+                const altKey = makeAltKey(t.title, t.artists, 0);
                 const row = await findRow(null, altKey);
-                console.log(`findRow result for ${t.title}, ${t.artists[0]} ${row}`)
                 // check if row by altKey exists
                 if (row) {
                     const spotifyId = row.externalIds[0]?.externalId ?? null;
