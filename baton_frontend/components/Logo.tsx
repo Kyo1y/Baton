@@ -11,7 +11,7 @@ export function LogoMark({
       viewBox="0 0 177 122"
       aria-hidden="true"
       className={
-        "h-20 w-20 [&>path]:transition-colors [&>path]:fill-transparent" +
+        "h-20 w-20 [&>path]:transition-colors [&>path]:fill-transparent [&>path:nth-of-type(3)]:fill-[#000000] " +
         className
       }
       {...props}
@@ -36,7 +36,7 @@ export function BrandLogo() {
   return (
     <Link href="/" aria-label="Home" className="group inline-flex items-center">
       {/* stroke uses currentColor; fill becomes orange on hover */}
-      <LogoMark className="text-foreground group-hover:[&>path]:fill-[#F8831E]" />
+      <LogoMark className="text-foreground group-hover:[&>path]:fill-[#F8831E] group-hover:[&>path:nth-of-type(3)]:fill-[#F8831E]" />
     </Link>
   );
 }

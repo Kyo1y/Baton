@@ -19,6 +19,8 @@ type Props = {
 export default function ServicePicker({ title, subtitle, exclude = [], mode, source }: Props) {
     const [selected, setSelected] = useState<string | null>(null);
     const router = useRouter();
+    const servicesHeights = SERVICES.map(s => s.height);
+    const maxServiceHeight = Math.max(...servicesHeights)
     const visible = SERVICES.filter(s => !exclude.includes(s.slug));
     const hrefFor = (slug: string) =>
     mode === "source" ? `/transfer/${slug}` : `/transfer/${source}/${slug}`;
@@ -44,7 +46,7 @@ export default function ServicePicker({ title, subtitle, exclude = [], mode, sou
                             <Button
                             key={service.slug}
                             className={clsx(
-                                `flex flex-col bg-[#F1F1F1] w-auto h-auto items-center justify-center rounded-[1.25rem] cursor-pointer`,
+                                `flex flex-col bg-[#F1F1F1] w-[${maxServiceHeight}] h-auto items-center justify-center rounded-[1.25rem] cursor-pointer`,
                                 isSelected ?
                                 "bg-transparent border border-[#F8831E] hover:bg-transparent p-1.75"
                                 :
@@ -57,7 +59,6 @@ export default function ServicePicker({ title, subtitle, exclude = [], mode, sou
                                 alt={service.name}
                                 width={service.width}
                                 height={service.height}
-                                className={`!h-${service.height} object-contain`}
                             />
                             </Button>
                         );

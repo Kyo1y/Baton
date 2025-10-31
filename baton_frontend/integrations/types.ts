@@ -26,7 +26,7 @@ export interface MusicAdapter {
     listPlaylistTracks(userId: string, playlistId: string, cursor?: string | null): Promise<Page<Track>>;
     listAllPlaylistTracks(userId: string, playlistId: string, startCursor?: string, ): Promise<Track[]>;
     createPlaylist(userId: string, name: string, publicParam: boolean): Promise<string>;
-    addTracks(userId: string, playlistId: string, tracks: Track[]): Promise<[Track[], number]>;
+    addTracks(userId: string, playlistId: string, tracks: Track[], isNewPlaylist: boolean): Promise<[Track[], number]>;
     fetchTrack(t: Track, access: string): Promise<any>;
     trackAlreadyExists(targetTrackId: string, targetPlaylist: Track[]): Promise<boolean>;
 }

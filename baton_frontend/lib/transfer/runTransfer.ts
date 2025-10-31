@@ -12,6 +12,10 @@ export type RunTransferInput = {
   destPlaylistName?: string | null;
 };
 
+export type TransferId = {
+  id: string;
+};
+
 export type RunTransferResult = {
   destPlaylistName: string;
   srcPlaylistName: string;
@@ -20,17 +24,27 @@ export type RunTransferResult = {
   copies: number;
 };
 
-export async function runTransfer(params: RunTransferInput): Promise<RunTransferResult> {
-    const { userId, source, dest, srcPlaylistId, destPlaylistId, srcPlaylistName, destDraft, destPlaylistName } = params;
+export async function runTransfer(params: TransferId): Promise<RunTransferResult> {
+    const { id } = params;
+    const transfer = await prisma.transferDraft.findUnique({
+        where: { id }
+    })
+    if (!transfer) throw new Error("Transfer data was lost. Please try again.");
+    const [userId, srcPlaylistId, destPlaylistId, destDraft, srcPlaylistName, destPlaylistName, source, dest] = [
+        transfer.userId, transfer.srcPlaylistId, transfer.destPlaylistId, { name: transfer.destDraftName, isPublic: transfer.destDraftIsPublic }, 
+        transfer.srcPlaylistName, transfer.destPlaylistName, transfer.source, transfer.dest
+    ]
 
     const srcAdapter = getAdapter(source);
     const destAdapter = getAdapter(dest);
     const srcTracks = await srcAdapter.listAllPlaylistTracks(userId, srcPlaylistId);
     if (destPlaylistId === "__draft__") {
-      if (!destDraft) throw new Error("Missing draft details to create destination playlist.");
-
+        if (destDraft.name == null || destDraft.isPublic == null) {
+            throw new Error("Missing draft name/privacy status to create destination playlist.");
+        }
+        console.log("PUBLIC PARAM @ RUNTRANSFER",destDraft.isPublic);
         const newPlaylistId = await destAdapter.createPlaylist(userId, destDraft.name, destDraft.isPublic);
-        const addingRes = await destAdapter.addTracks(userId, newPlaylistId, srcTracks);
+        const addingRes = await destAdapter.addTracks(userId, newPlaylistId, srcTracks, true);
         const failed = addingRes[0];
         const copies = addingRes[1];
         const addedCounted = srcTracks.length - failed.length;
@@ -42,27 +56,21 @@ export async function runTransfer(params: RunTransferInput): Promise<RunTransfer
             failed: failedCounted,
             copies: copies,
         }
-        const latest = await prisma.transferDraft.findFirst({
-            where: { status: "RUNNING" },
-            orderBy: { createdAt: "desc" },
-            select: { id: true },
-        });
-
-        if (latest) {
-            await prisma.transferDraft.update({
-                where: { id: latest.id },
-                data: {
+        
+        await prisma.transferDraft.update({
+            where: { id },
+            data: {
                 status: failedCounted > 0 ? "PARTIAL" : "SUCCESS",
                 added: addedCounted,
                 failed: failedCounted,
-                },
-            });
-        }
-        console.log("RUN TRANSFER RES LINE 62",result);
+            },
+        });
+
+        console.log("RUN TRANSFER RES LINE 69",result);
         return result;
     }
     else {
-        const addingRes = await destAdapter.addTracks(userId, destPlaylistId, srcTracks);
+        const addingRes = await destAdapter.addTracks(userId, destPlaylistId, srcTracks, false);
         const failed = addingRes[0];
         const copies = addingRes[1];
         const addedCounted = srcTracks.length - failed.length - copies;
@@ -74,24 +82,18 @@ export async function runTransfer(params: RunTransferInput): Promise<RunTransfer
             failed: failedCounted,
             copies: copies,
         }
-        const latest = await prisma.transferDraft.findFirst({
-            where: { status: "RUNNING" },
-            orderBy: { createdAt: "desc" },
-            select: { id: true },
-        });
 
-        if (latest) {
-            await prisma.transferDraft.update({
-                where: { id: latest.id },
-                data: {
+        await prisma.transferDraft.update({
+            where: { id },
+            data: {
                 status: failedCounted > 0 ? "PARTIAL" : "SUCCESS",
                 added: addedCounted,
                 failed: failedCounted,
                 copies: copies,
-                },
-            });
-        }
-        console.log("RUN TRANSFER RES LINE 95", result);
+            },
+        });
+        
+        console.log("RUN TRANSFER RES LINE 96", result);
         return result;
     }
 }

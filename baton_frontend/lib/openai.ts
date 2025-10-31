@@ -9,7 +9,7 @@ export default async function normalizeGPT(title: string, artist: string) {
             - If title has "Artist - Title" (or "Artist - Title" / "Artist: Title" / "Artist x Title"), take artist & title from there.
             - If a song is from youtube, artist name will be the channel name and may contain something like "ArtistName - Topic" or "ArtistNameVEVO". Strip " - Topic" and trailing "VEVO"; title is the song name.
             - Remove junk: (official video/audio), lyrics/lyric video, visualizer, sped up/slowed/reverb, nightcore, 8d, bass boosted, instrumental, remaster(ed) YYYY?, radio edit, extended mix, live…, remake, cover, edit, bootleg, loop. Remove bracketed []/() parts when they're just junk. Collapse whitespace.
-            - If it's multiple authors, pick the most popular one and return his name
+            - If it's multiple authors, pick the name of the first artist that is listed
             - Output ONLY: Artist:Title (no quotes, no extra text).
 
             Examples:

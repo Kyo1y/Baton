@@ -29,9 +29,14 @@ export default function PlaylistPicker( { source, dest, userId, sourcePlaylists,
         () => (draftDest ? [...destPlaylists, draftDest] : destPlaylists),
         [draftDest, destPlaylists]
     )
-    console.log(draftDest)
+    useEffect(() => {
+        console.log("DRAFT",draftDest)
+        console.log(selectedDestId)
+        console.log(selectedSourceId)
+    }, [draftDest, selectedDestId, selectedSourceId]
+    )
+
     function addDraftPlaylist(name: string, isPublic: boolean, url: string) {
-        console.log("DRAFT PL NAME",name)
         setDraftDest({
             id: "__draft__",
             name,
@@ -53,7 +58,7 @@ export default function PlaylistPicker( { source, dest, userId, sourcePlaylists,
             destPlaylistId: selectedDestId!, 
             srcPlaylistName,
             destDraft: draftSelected && draftDest ? { name: draftDest.name, isPublic: draftDest.isPublic, } : null,
-            destPlaylistName: draftSelected && draftDest ? null : destPlaylistName,
+            destPlaylistName: draftSelected && draftDest ? draftDest.name : destPlaylistName,
         })
         router.push(toCompletion);
 

@@ -66,45 +66,52 @@ async function createPair(t: Track, access: string, isrcParam?: string, altKeyPa
     if (track == false) {
         return "404";
     }
-    const data = {
-        title: t.title,
-        artists: t.artists,
-        durationMs: 0,
-        isrc: isrcParam,
-        altKey: altKeyParam,
-    }
 
-    const canonical = await prisma.canonicalTrack.upsert({
-        where: isrcParam ? { isrc: isrcParam } : { altKey: altKeyParam },
-        create: data,
-        update: {
-            title: data.title,
-            artists: data.artists,
-            durationMs: data.durationMs,
-        },
-        select: { id:true, isrc: true }
-    })
+    const existing = await prisma.trackExternalId.findUnique({
+        where: { provider_externalId: { provider: "spotify", externalId: track.spotifyId } },
+        select: { canonicalId: true },
+    });
+    if (!existing) {
+        const data = {
+            title: t.title,
+            artists: t.artists,
+            durationMs: 0,
+            isrc: isrcParam,
+            altKey: altKeyParam,
+        }
 
-    
-    if (track.isrc && !canonical.isrc) {
-        await prisma.canonicalTrack.update({
-            where: { id: canonical.id },
-            data: { isrc: track.isrc }
+        const canonical = await prisma.canonicalTrack.upsert({
+            where: isrcParam ? { isrc: isrcParam } : { altKey: altKeyParam },
+            create: data,
+            update: {
+                title: data.title,
+                artists: data.artists,
+                durationMs: data.durationMs,
+            },
+            select: { id:true, isrc: true }
         })
-    }
-    const externalid = await prisma.trackExternalId.upsert({
-        where: { canonicalId_provider: { canonicalId: canonical.id, provider: "spotify" }},
-        create: {
-            canonicalId: canonical.id,
-            provider: "spotify",
-            externalId: track.spotifyId,
-        },
-        update: {
-            externalId: track.spotifyId,
-        },
-        select: {externalId: true}
-    })
-    return externalid.externalId;
+
+        if (track.isrc && !canonical.isrc) {
+            await prisma.canonicalTrack.update({
+                where: { id: canonical.id },
+                data: { isrc: track.isrc }
+            })
+        }
+        const externalid = await prisma.trackExternalId.upsert({
+            where: { canonicalId_provider: { canonicalId: canonical.id, provider: "spotify" }},
+            create: {
+                canonicalId: canonical.id,
+                provider: "spotify",
+                externalId: track.spotifyId,
+            },
+            update: {
+                externalId: track.spotifyId,
+            },
+            select: {externalId: true}
+        })
+        return externalid.externalId;
+    };
+    return track.spotifyId;   
 }
 
 function checkDuplicatePlaylistNames(list: Playlist[]) {
@@ -235,7 +242,7 @@ export const spotifyAdapter: MusicAdapter = {
         }
         return false;
     },
-    async addTracks(userId, playlistId, tracks): Promise<[Track[], number]> {
+    async addTracks(userId, playlistId, tracks, isNewPlaylist: boolean): Promise<[Track[], number]> {
         const access = await ensureAccessToken(userId, "spotify");
         const ids: string[] = [];
         let copies: number = 0;
@@ -254,7 +261,10 @@ export const spotifyAdapter: MusicAdapter = {
             }
             t = normTrack;
             const altKey = makeAltKey(t.title, t.artists, 0);
-            const targetPlaylist = await this.listAllPlaylistTracks(userId, playlistId);
+            let targetPlaylist: Track[] | null = null;
+            if (!isNewPlaylist) {
+                targetPlaylist = await this.listAllPlaylistTracks(userId, playlistId);
+            }
 
             // check if Track includes ISRC
             if (t.isrc) {
@@ -265,10 +275,15 @@ export const spotifyAdapter: MusicAdapter = {
                     // check if spotify ID for that ISRC exists in that row
                     if (spotifyId) {
                         id = spotifyId;
-                        const alreadyExists = await this.trackAlreadyExists(id, targetPlaylist);
-                        if (alreadyExists) {
-                            copies++;
-                            continue;
+                        if (!isNewPlaylist && targetPlaylist) {
+                            const alreadyExists = await this.trackAlreadyExists(id, targetPlaylist);
+                            if (alreadyExists) {
+                                copies++;
+                                continue;
+                            }
+                            else {
+                                ids.push(id);
+                            }
                         }
                         else {
                             ids.push(id);
@@ -287,10 +302,15 @@ export const spotifyAdapter: MusicAdapter = {
                             })
                             continue;
                         }
-                        const alreadyExists = await this.trackAlreadyExists(id, targetPlaylist);
-                        if (alreadyExists) {
-                            copies++;
-                            continue;
+                        if (!isNewPlaylist && targetPlaylist) {
+                            const alreadyExists = await this.trackAlreadyExists(id, targetPlaylist);
+                            if (alreadyExists) {
+                                copies++;
+                                continue;
+                            }
+                            else {
+                                ids.push(id);
+                            }
                         }
                         else {
                             ids.push(id);
@@ -310,10 +330,15 @@ export const spotifyAdapter: MusicAdapter = {
                         })
                         continue;
                     }
-                    const alreadyExists = await this.trackAlreadyExists(id, targetPlaylist);
-                    if (alreadyExists) {
-                        copies++;
-                        continue;
+                    if (!isNewPlaylist && targetPlaylist) {
+                        const alreadyExists = await this.trackAlreadyExists(id, targetPlaylist);
+                        if (alreadyExists) {
+                            copies++;
+                            continue;
+                        }
+                        else {
+                            ids.push(id);
+                        }
                     }
                     else {
                         ids.push(id);
@@ -330,10 +355,15 @@ export const spotifyAdapter: MusicAdapter = {
                     // check if spotify ID associated with that row exists
                     if (spotifyId) {
                         id = spotifyId;
-                        const alreadyExists = await this.trackAlreadyExists(id, targetPlaylist);
-                        if (alreadyExists) {
-                            copies++;
-                            continue;
+                        if (!isNewPlaylist && targetPlaylist) {
+                            const alreadyExists = await this.trackAlreadyExists(id, targetPlaylist);
+                            if (alreadyExists) {
+                                copies++;
+                                continue;
+                            }
+                            else {
+                                ids.push(id);
+                            }
                         }
                         else {
                             ids.push(id);
@@ -352,10 +382,15 @@ export const spotifyAdapter: MusicAdapter = {
                             })
                             continue;
                         }
-                        const alreadyExists = await this.trackAlreadyExists(id, targetPlaylist);
-                        if (alreadyExists) {
-                            copies++;
-                            continue;
+                        if (!isNewPlaylist && targetPlaylist) {
+                            const alreadyExists = await this.trackAlreadyExists(id, targetPlaylist);
+                            if (alreadyExists) {
+                                copies++;
+                                continue;
+                            }
+                            else {
+                                ids.push(id);
+                            }
                         }
                         else {
                             ids.push(id);
@@ -375,10 +410,15 @@ export const spotifyAdapter: MusicAdapter = {
                         })
                         continue;
                     }
-                    const alreadyExists = await this.trackAlreadyExists(id, targetPlaylist);
-                    if (alreadyExists) {
-                        copies++;
-                        continue;
+                    if (!isNewPlaylist && targetPlaylist) {
+                        const alreadyExists = await this.trackAlreadyExists(id, targetPlaylist);
+                        if (alreadyExists) {
+                            copies++;
+                            continue;
+                        }
+                        else {
+                            ids.push(id);
+                        }
                     }
                     else {
                         ids.push(id);

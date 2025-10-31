@@ -8,11 +8,11 @@ import {
   NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuLink
 } from "@/components/ui/navigation-menu"
 import type { NavLink } from "@/nav.config"
-import Image from "next/image"
 import { BrandLogo } from "@/components/Logo";
 
 export default function NavBar({links}: {links: NavLink[]}) {
   const pathname = usePathname()
+  const isAuthed = links.some(i => i.label.toLowerCase() === "dashboard");
 
   return (
     <header className="sticky top-0 z-40 bg-background/80 backdrop-blur">
@@ -23,7 +23,7 @@ export default function NavBar({links}: {links: NavLink[]}) {
         <div className="hidden md:flex items-center gap-4">
           <NavigationMenu>
             <NavigationMenuList>
-              {links.map(l => (
+              {links.map(l => 
                 <NavigationMenuItem key={l.href}>
                   <NavigationMenuLink
                     href={l.href}
@@ -33,7 +33,7 @@ export default function NavBar({links}: {links: NavLink[]}) {
                     {l.label}
                   </NavigationMenuLink>
                 </NavigationMenuItem>
-              ))}
+              )}
             </NavigationMenuList>
           </NavigationMenu>
           <Button asChild className="bg-[#F8831E] hover:bg-[#EB7107]"><Link href="/dashboard">Dashboard</Link></Button>

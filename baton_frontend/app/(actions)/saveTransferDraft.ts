@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 /* check if destDraft? won't cause trouble */
 export async function saveTransferDraft(params: {
-  userId: string,   
+  userId: string,
   source: string,
   dest: string,
   srcPlaylistId: string,
@@ -18,6 +18,8 @@ export async function saveTransferDraft(params: {
         data: { 
           userId, source, dest, srcPlaylistId, destPlaylistId, srcPlaylistName, destDraftName: destDraft?.name, destDraftIsPublic: destDraft?.isPublic, destPlaylistName,
         },
+        select: { id: true }
     });
+
     return newTransfer;
 }
