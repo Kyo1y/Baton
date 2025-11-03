@@ -1,26 +1,30 @@
 # 🎵 Music Transfer Bot (Spotify ↔ YouTube Music)
 
-This Telegram bot allows users to transfer playlists between **Spotify** and **YouTube Music** using **Firebase** for authentication and data storage.
+This Web App/Telegram bot allows users to transfer playlists between **Spotify** and **YouTube Music**.
 
 Search @TransferMusic_bot on Telegram to try it out!
+Web App is still under development ⏳
 
 ---
 
 ## 📌 Features
-✅ Transfer playlists from **Spotify to YouTube Music** and  from **YouTube Music to Spotify**
-
-✅ Secure authentication using Firebase  
-✅ Uses **Flask** for backend handling  
+✅ Transfer playlists from **Spotify to YouTube Music** and from **YouTube Music to Spotify**
+✅ Create new playlists on transfer
+✅ Secure OAuth (PKCE) for Spotify and YouTube (tokens stored in DB)
+✅ Transfer history
 
 ---
+## 🧰 Tech Stack
 
-## 🛑 Known Issues
+Frontend: Next.js (App Router) + TypeScript, Tailwind + shadcn/ui, Flask
 
-### ❌ YouTube to Spotify Transfer Currently Unavailable
-Telegram Inline Buttons: callback queries aren’t acknowledged, so the client spinner never clears and users must click each button multiple times.
+Auth: NextAuth (Google/GitHub), server-side guards with getServerSession
 
-### 🔧 Solution in Development
-Add await query.answer() at the start of every callback handler to immediately clear the Telegram inline‑button spinner, and refactor the choice handler to invoke the correct auth step directly for a true one‑click flow.
+DB: Postgres (Docker), Prisma ORM, Firebase Real-time Database
+
+Caching: unstable_cache + revalidateTag
+
+APIs: Spotify Web API, YouTube Data API v3, OpenAI API, Telegram API
 
 ---
 
