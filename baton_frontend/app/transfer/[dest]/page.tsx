@@ -15,7 +15,6 @@ export default async function StepTwo({ params } : { params: Promise<{ dest: str
     }
 
     const userId = session.user.id;
-    console.log(dest, userId)
     await requireIntegration(userId, dest, `/transfer/${dest}`);
     return (
         <ServicePicker 

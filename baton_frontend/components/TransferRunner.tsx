@@ -10,7 +10,7 @@ export default function TransferRunner({ transferDraftId, source, dest, userId }
   const router = useRouter();
   const [status, setStatus] = useState<"running"|"success"|"partial"|"failed">("running");
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<{ added: number; unmatched: number, copies: number, destPlaylistName: string, srcPlaylistName: string } | null>(null);
+  const [result, setResult] = useState<{ source: string; dest: string; added: number; unmatched: number, copies: number, destPlaylistName: string, srcPlaylistName: string } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -23,7 +23,7 @@ export default function TransferRunner({ transferDraftId, source, dest, userId }
           return;
         }
         if (cancelled) return;
-        setResult({ added: res.added, unmatched: res.failed, copies: res.copies, destPlaylistName: res.destPlaylistName, srcPlaylistName: res.srcPlaylistName});
+        setResult({ source: res.source, dest:res.dest, added: res.added, unmatched: res.failed, copies: res.copies, destPlaylistName: res.destPlaylistName, srcPlaylistName: res.srcPlaylistName});
         setStatus(res.failed ? "partial" : "success");
         sessionStorage.removeItem(`draft:${userId}:${dest}`);
       }
@@ -52,12 +52,23 @@ export default function TransferRunner({ transferDraftId, source, dest, userId }
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   }, [status, pathname, searchParams, router]);
 
+  useEffect(() => {
+    if (status === "running") return;
+
+    sessionStorage.setItem(
+      "transfer:result:last",
+      JSON.stringify({ status, error, result })
+    )
+    router.replace(`${pathname}/result?status=${status}`, { scroll: false })
+  }, [status, error, result, pathname, router]);
+
+
   const showOverlay = status === "running";
 
   return (
     <div className="mx-auto max-w-xl p-6">
       {showOverlay && <ProcessingOverlay />}
-      {!showOverlay && status === "success" && (
+      {/* {!showOverlay && status === "success" && (
         <SuccessView source={result!.destPlaylistName} dest={result!.srcPlaylistName} result={result!} />
       )}
       {!showOverlay && status === "partial" && (
@@ -65,33 +76,7 @@ export default function TransferRunner({ transferDraftId, source, dest, userId }
       )}
       {!showOverlay && status === "failed" && (
         <ErrorView message={error ?? "Something went wrong."} onBack={() => router.push(`/transfer/${source}/${dest}`)} />
-      )}
-    </div>
-  );
-}
-
-function SuccessView({ source, dest, result, note }: { 
-  source: string; dest: string; 
-  result: { added: number; unmatched: number, copies: number, destPlaylistName: string, srcPlaylistName: string }; 
-  note?: string 
-}) {
-  return (
-    <div>
-      <h1 className="text-2xl font-semibold">Transfer complete</h1>
-      {note && <p className="mt-1 text-sm text-muted-foreground">{note}</p>}
-      <h2>{result.srcPlaylistName} → {result.destPlaylistName}</h2>
-      <p className="mt-4">Added {result.added} tracks. Unmatched: {result.unmatched}. Copies avoided: {result.copies}</p>
-      <a className="mt-4 inline-block underline" href={`/transfer`}>Start another</a>
-    </div>
-  );
-}
-
-function ErrorView({ message, onBack }: { message: string; onBack: () => void }) {
-  return (
-    <div className="text-center">
-      <h2 className="text-lg font-semibold">Transfer failed</h2>
-      <p className="mt-2 text-sm text-muted-foreground">{message}</p>
-      <button onClick={onBack} className="mt-4 underline">Go back</button>
+      )} */}
     </div>
   );
 }

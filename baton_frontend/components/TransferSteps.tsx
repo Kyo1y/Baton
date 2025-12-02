@@ -17,7 +17,9 @@ function computeCurrent(pathname: string): number {
   if (depth <= 1) return 1;
   if (depth === 2) return 2;
   if (depth === 3) return 3;
-  if (depth >= 4) return 4;
+  if (depth === 4) return 4;
+  if (depth >= 5) return 5;
+  console.log(depth)
   return 1;
 }
 
@@ -33,22 +35,23 @@ export default function TransferStepper({ override }: { override?: number }) {
 
   }, [pathname, searchParams]);
   return (
-    <nav className="mx-auto max-w-5xl px-4 sm:px-6 md:px-8 py-4">
+    <nav className="mx-auto max-w-5xl px-4 sm:px-6 md:px-8 py-12">
       <ol className="flex flex-wrap items-center gap-4">
         {STEPS.map((label, idx) => {
           const stepNum = idx + 1;
+          console.log(stepNum)
           let isCompleted = stepNum < current;
           let isActive = stepNum === current;
-          if (stepNum == 4) {
+          if (stepNum == 5) {
             isCompleted = true;
             isActive = false;
           }
           return (
-            <li key={label} className="flex items-center">
+            <li key={label} className="hidden lg:flex items-center">
               <div className="flex items-center gap-3">
                 <span
                   className={clsx(
-                    "inline-flex size-8 items-center justify-center rounded-full border text-sm font-medium",
+                    "inline-flex size-8 items-center justify-center rounded-full border text-sm font-medium bg-white",
                     isCompleted &&
                       "bg-[#F8831E] text-white border-[#F8831E]",
                     isActive &&
@@ -58,7 +61,7 @@ export default function TransferStepper({ override }: { override?: number }) {
                   )}
                 >
                   { (() => {
-                    if (stepNum == 4) {
+                    if (stepNum == 5) {
                       if (failed) {
                         return <X className="size-4" />
                       }
@@ -78,8 +81,8 @@ export default function TransferStepper({ override }: { override?: number }) {
                 </span>
                 <span
                   className={clsx(
-                    "text-sm",
-                    isActive ? "font-semibold text-[#F8831E]" : "text-muted-foreground"
+                    "text-sm font-semibold",
+                    isActive ? "font-bold text-[#F8831E]" : "text-muted-foreground"
                   )}
                 >
                   {label}

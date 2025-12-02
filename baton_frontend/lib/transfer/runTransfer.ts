@@ -17,11 +17,13 @@ export type TransferId = {
 };
 
 export type RunTransferResult = {
-  destPlaylistName: string;
-  srcPlaylistName: string;
-  added: number;
-  failed: number;
-  copies: number;
+    source: string;
+    dest: string;
+    destPlaylistName: string;
+    srcPlaylistName: string;
+    added: number;
+    failed: number;
+    copies: number;
 };
 
 export async function runTransfer(params: TransferId): Promise<RunTransferResult> {
@@ -50,6 +52,8 @@ export async function runTransfer(params: TransferId): Promise<RunTransferResult
         const addedCounted = srcTracks.length - failed.length;
         const failedCounted = failed.length;
         const result = {
+            source,
+            dest,
             destPlaylistName: destDraft.name,
             srcPlaylistName: srcPlaylistName,
             added: addedCounted,
@@ -76,6 +80,8 @@ export async function runTransfer(params: TransferId): Promise<RunTransferResult
         const addedCounted = srcTracks.length - failed.length - copies;
         const failedCounted = failed.length;
         const result = {
+            source,
+            dest,
             destPlaylistName: destPlaylistName!,
             srcPlaylistName: srcPlaylistName,
             added: addedCounted,

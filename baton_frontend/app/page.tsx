@@ -1,30 +1,23 @@
 "use server";
 
-import SignInBtn from "@/components/SignInBtn";
-import SignOutBtn from "@/components/SignOutBtn";
-import { authOptions } from "@/auth";
-import { getServerSession } from "next-auth";
-import Link from "next/link";
 import HomeIntro from "@/components/HomeIntro";
+import Process from "@/components/Process";
+import Prompt from "@/components/Prompt";
+import WhyBaton from "@/components/WhyBaton";
 
 export default async function Home() {
-  const session = await getServerSession(authOptions);
-  if (session?.user) {
-    return (
-      <>
-      <div style={{display: "flex", flexDirection: "column"}}>
-        <Link href="/user-info">User Info</Link>
-        <SignOutBtn />
-        <HomeIntro />
-      </div>
-      </>
-    );
-  }
   return (
     <>  
-      <HomeIntro />
-      <p>You are not signed in</p>
-      <SignInBtn />
+      {/* <div
+      className="z-2"
+      > */}
+        <HomeIntro />
+        <WhyBaton />
+        <Process />
+        <Prompt />
+      {/* </div> */}
+        
+      
     </>
   );
 }

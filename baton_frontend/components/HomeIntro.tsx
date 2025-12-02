@@ -2,20 +2,25 @@
 import Link from "next/link"
 import { Button } from "./ui/button"
 import ServicesList from "./ServicesList"
+import VantaBirdsBackground from "./vantaEffects/VantaBirds"
 
 export default function HomeIntro() {
     return (
+
         <section
             id="hero"
             aria-labelledby="hero-title"
-            className="relative over-flow-hidden
-            flex p-10 items-center justify-center bg-background flex-col"
+            className="relative 
+            flex px-10 items-center justify-center bg-background flex-col"
         >
+        {/* <VantaBirdsBackground> */}
+
             <div
                 className="
-                mx-auto flex min-h-[calc(100svh-3.5rem)] max-w-5xl flex-col items-center justify-center
+                mx-auto flex min-h-[calc(90svh-3.5rem)] max-w-5xl flex-col items-center justify-center
                 gap-6 px-4 sm:px-6 md:px-8 py-16 sm:py-24
                 text-center
+                !z-1
                 "
             >
                 <h1
@@ -28,10 +33,9 @@ export default function HomeIntro() {
                 Move your music <span className="block text-[#F8831E]">anywhere</span>
                 </h1>
 
-                <p className="text-balance max-w-prose text-base sm:text-lg text-muted-foreground">
+                <p className="text-balance max-w-prose text-base sm:text-xl text-muted-foreground">
                 Seamlessly transfer your playlists, liked songs, and music library between any streaming service.
-                <br className="hidden sm:block" />
-                No more starting from scratch.
+                <br className="hidden sm:block" /> No more starting from scratch.
                 </p>
 
                 <div className="flex w-full flex-col items-center justify-center gap-3 sm:w-auto sm:flex-row">
@@ -55,8 +59,10 @@ export default function HomeIntro() {
                 <ServicesList />
 
             </div>
+            {/* </VantaBirdsBackground> */}
 
 
         </section>
+
     )
 }

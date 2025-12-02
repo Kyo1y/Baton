@@ -26,8 +26,8 @@ export default function ServicePicker({ title, subtitle, exclude = [], mode, sou
     mode === "source" ? `/transfer/${slug}` : `/transfer/${source}/${slug}`;
 
     return (
-        <section id="source-service">
-            <div className="flex flex-col justify-center items-center gap-7 p-[2rem]">
+        <section id="source-service !z-2">
+            <div className="flex flex-col justify-center items-center gap-7 p-[2rem] pb-[13rem] ">
                 <div className="flex flex-col justify-center items-center gap-2">
                     <h1 
                     className="text-balance font-bold tracking-tight
@@ -46,11 +46,11 @@ export default function ServicePicker({ title, subtitle, exclude = [], mode, sou
                             <Button
                             key={service.slug}
                             className={clsx(
-                                `flex flex-col bg-[#F1F1F1] w-[${maxServiceHeight}] h-auto items-center justify-center rounded-[1.25rem] cursor-pointer`,
+                                `flex flex-col bg-[#F1F1F1] p-2 h-auto items-center justify-center rounded-[1.25rem] cursor-pointer border`,
                                 isSelected ?
-                                "bg-transparent border border-[#F8831E] hover:bg-transparent p-1.75"
+                                "bg-white border border-[#F8831E] hover:bg-white "
                                 :
-                                "hover:bg-[#F2F2F2] hover:shadow-lg p-2"
+                                "hover:bg-[#F2F2F2] hover:shadow-lg"
                             )}
                             onClick={() => setSelected(isSelected ? null : service.slug)}
                             >
@@ -68,10 +68,10 @@ export default function ServicePicker({ title, subtitle, exclude = [], mode, sou
                     <Button
                         disabled={!selected}
                         className={clsx(
-                                "flex flex-col border bg-[#CDCDCD] hover:bg-[#CDCDCD] text-muted-foreground h-auto w-auto items-center justify-center rounded-xl overflow-x-auto",
+                                "flex flex-col p-2 border bg-[#CDCDCD] hover:bg-[#CDCDCD] text-muted-foreground h-auto w-auto items-center justify-center rounded-xl overflow-x-auto",
                                 selected ?
-                                    "bg-transparent border-[#F8831E] hover:bg-transparent text-black cursor-pointer p-1.75"
-                                    : "p-2"
+                                    "bg-white border-[#F8831E] hover:bg-white text-black cursor-pointer  border"
+                                    : " border"
                             )}
                         onClick={() => selected && router.push(hrefFor(selected))}
                     >

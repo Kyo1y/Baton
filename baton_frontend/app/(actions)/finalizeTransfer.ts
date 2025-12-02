@@ -26,7 +26,7 @@ export async function finalizeTransfer(transferId: string) {
       t.status == TransferStatus.PARTIAL || 
       t.status == TransferStatus.FAILED || 
       t.status == TransferStatus.SUCCESS) {
-      return { added: t?.added ?? 0, failed: t?.failed ?? 0, copies: t?.copies ?? 0, srcPlaylistName: t?.srcPlaylistName ?? "", destPlaylistName: t?.destPlaylistName ?? "" };
+      return { source: t.source, dest: t.dest, added: t?.added ?? 0, failed: t?.failed ?? 0, copies: t?.copies ?? 0, srcPlaylistName: t?.srcPlaylistName ?? "", destPlaylistName: t?.destPlaylistName ?? "" };
     }
   }
   else {

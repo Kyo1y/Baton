@@ -23,7 +23,6 @@ export default async function TransferContent( {params}: { params: Promise<{ des
         where: { userId, source: dest, dest: content },
         orderBy: { createdAt: "desc"},
     })
-    let transferResult;
     if (!newTransfer) {
         return (
         <div className="mx-auto max-w-md p-6 text-center">

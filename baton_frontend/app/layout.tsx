@@ -3,9 +3,13 @@ import { buildNav } from "@/nav.config";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/auth";
 import './globals.css';
-
+import Footer from "@/components/Footer";
+import WithOptionalVanta from "@/components/WithOptionalVanta";
+import VantaDotsBackground from "@/components/vantaEffects/VantaDots";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+
+
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authOptions);
@@ -14,8 +18,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="en">
       <body>
-        <NavBar links={links} />
-        {children}
+          <NavBar links={links} />
+          <VantaDotsBackground children={children}/>
+          <Footer />
+
+        
       </body>
     </html>
   );
