@@ -105,3 +105,20 @@ declare module "vanta/dist/vanta.dots.min" {
 
   export default function DOTS(options: VantaOptions): VantaEffect;
 }
+
+declare module "vanta/dist/vanta.topology.min" {
+  interface VantaOptions {
+    el: HTMLElement | string;
+    p5?: any;
+    color: string;
+    backgroundColor: string;
+    [key: string]: any;
+  }
+
+  type VantaEffect = {
+    destroy: () => void;
+
+  };
+
+  export default function TOPOLOGY(options: VantaOptions): VantaEffect;
+}

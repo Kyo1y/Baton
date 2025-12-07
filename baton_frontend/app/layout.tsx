@@ -4,7 +4,6 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/auth";
 import './globals.css';
 import Footer from "@/components/Footer";
-import WithOptionalVanta from "@/components/WithOptionalVanta";
 import VantaDotsBackground from "@/components/vantaEffects/VantaDots";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";

@@ -4,6 +4,7 @@ import { authOptions } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { OAUTH } from "@/integrations/providers";
+import { revalidateTag, revalidatePath } from "next/cache";
 
 export const runtime = "nodejs";
 
@@ -142,6 +143,9 @@ export async function GET(request: Request, { params }: {params: Promise<{ provi
     const res = NextResponse.redirect(new URL(returnTo, url.origin));
     res.cookies.delete(`${provider}_oauth_state`);
     res.cookies.delete(`${provider}_pkce_verifier`);
+
+    await revalidateTag(`connections:${userId}`);
+    await revalidatePath(returnTo);
 
     return res;
 }

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 
-export default function VantaTrunkBackground({ children, size }: { children: React.ReactNode, size?: number }) {
+export default function VantaTopologyBackground({ children }: { children: React.ReactNode, }) {
     const ref = useRef<HTMLDivElement | null>(null);
    
     useEffect(() => {
@@ -13,31 +13,24 @@ export default function VantaTrunkBackground({ children, size }: { children: Rea
         if (!ref.current) return;
 
         // Dynamic imports so it only runs on the client
-        const [p5Mod, trunkMod] = await Promise.all([
+        const [p5Mod, topologyMod] = await Promise.all([
           import("p5"),
-          import("../../lib/vendor/vanta.trunk.min.js"),
+          import("vanta/dist/vanta.topology.min"),
         ]);
 
         const P5 = (p5Mod as any).default ?? p5Mod;
-        const TRUNK = (trunkMod as any).default ?? trunkMod;
+        const TOPOLOGY = (topologyMod as any).default ?? topologyMod;
 
         // Some Vanta builds also read from window.p5 — provide it
         (window as any).p5 = P5;
 
-        if (!mounted || typeof TRUNK !== "function") return;
+        if (!mounted || typeof TOPOLOGY !== "function") return;
 
-        effect = TRUNK({
+        effect = TOPOLOGY({
           el: ref.current,
           p5: P5,
           color: 0xf8831e,
           backgroundColor: 0xffffff,
-          baseRadius: 100,
-          ringGap: 4,
-          chaosMag: 12,
-          chaosDelta: 0.20,
-          chaosInit: 0.7,
-          spacing: size ?? 0.1,
-          chaos: 1.0,
         });
       })();
 
@@ -45,11 +38,11 @@ export default function VantaTrunkBackground({ children, size }: { children: Rea
         mounted = false;
         effect?.destroy?.();
       };
-    }, [size]);
+    }, []);
 
     return (
       <>
-        <div ref={ref} className="fixed inset-0 -z-10 pointer-events-none" />
+        <div ref={ref} className="fixed inset-0 z-1 pointer-events-none" />
         {children}
       </>
     );

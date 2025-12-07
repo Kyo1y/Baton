@@ -3,6 +3,11 @@ import { TransferStatus } from "@prisma/client";
 import Image from "next/image";
 import { Button } from "./ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Unlink, Link } from "lucide-react";
+import { SERVICES } from "@/lib/services";
+import { useMemo } from "react";
+import { useRouter } from "next/navigation";
+
 
 
 type Props = {
@@ -23,6 +28,7 @@ type Props = {
         srcPlaylistName: string;
         destPlaylistName: string | null;
     }[],
+    userId: string,
     disconnectService: (id: string, userId: string, provider: string) => Promise<void>,
 }
 const statusStyle: Record<string, string> = {
@@ -54,7 +60,8 @@ export function TransfersTable({ transfers }: { transfers: Props["transfers"] })
     <div className="relative w-full">
         <div
             className="
-            h-[60svh]
+            max-h-[60svh]
+            h-auto
             overflow-auto
             overscroll-contain
             rounded-lg border
@@ -102,10 +109,18 @@ export function TransfersTable({ transfers }: { transfers: Props["transfers"] })
   );
 }
 
-export default function Dashboard({ services, transfers, disconnectService }: Props) {
+export default function Dashboard({ services, transfers, userId, disconnectService }: Props) {
     const spotifyLogoSrc = "/logos/spotify.svg";
     const ytmusicLogoSrc = "/logos/youtube-music.svg";
+    const router = useRouter();
+    const connected = useMemo(() => new Set(services.map(s => s.provider)), [services]);
+    const disconnected = useMemo(() => SERVICES.map((s) => s.slug).filter(p => !connected.has(p)), [connected]);
 
+    const handleConnect = (provider: string) => {
+        router.push(`/api/oauth/${provider}/start?return_to=/dashboard`);
+    };
+
+    
     return (
         <section
             id="dashboard"
@@ -115,7 +130,7 @@ export default function Dashboard({ services, transfers, disconnectService }: Pr
         >
             <div
                 key={"dashboard-container"}
-                className="flex flex-[1_3] flex-col lg:flex-row gap-5"
+                className="flex flex-[1_3] flex-col lg:flex-row gap-5 z-1 "
             >
                 <div
                     className="flex flex-col gap-7 z-1"
@@ -124,13 +139,42 @@ export default function Dashboard({ services, transfers, disconnectService }: Pr
                     <div
                         className="flex flex-row gap-2 lg:flex-col"
                     >
-
-                            {services.map((s) => {
+                        {disconnected.map((s) => {
+                            const imgSrc = s == "spotify" ? spotifyLogoSrc : ytmusicLogoSrc;
+                            return (
+                                <div
+                                key={s + "_disconnected"}
+                                className="flex flex-col p-5 border-1 rounded-xl items-center h-fit w-fit gap-2 bg-white"
+                                >
+                                    <Image 
+                                        src={imgSrc}
+                                        alt={s}
+                                        width={50}
+                                        height={50}
+                                    />
+                                    <h3
+                                    className="text-lg truncate w-[8rem] text-center"
+                                    >
+                                        {s == "spotify" ? "Spotify" : "YouTube Music"}
+                                    </h3>
+                                    <Button onClick={() => handleConnect(s)}
+                                        className="
+                                        cursor-pointer
+                                        flex p-2 bg-[#43B929] hover:bg-[#43B929] text-white h-auto w-auto items-center justify-center rounded-md overflow-x-auto
+                                        "
+                                    >
+                                        <Link />
+                                        Connect
+                                    </Button>
+                                </div>
+                            )
+                        })}
+                        {services.map((s) => {
                             const imgSrc = s.provider == "spotify" ? spotifyLogoSrc : ytmusicLogoSrc;
                             return (
                                 <div
                                 key={s.provider}
-                                className="flex flex-col p-5 border-1 rounded-lg items-center h-fit w-fit"
+                                className="flex flex-col p-5 border-1 rounded-xl items-center h-fit w-fit gap-2 bg-white"
                                 >
                                     <Image 
                                         src={imgSrc}
@@ -146,14 +190,16 @@ export default function Dashboard({ services, transfers, disconnectService }: Pr
                                     <Button onClick={() => disconnectService(s.id, s.userId, s.provider)}
                                         className="
                                         cursor-pointer
-
+                                        flex p-2 bg-[#FF4242] hover:bg-[#FF4242] text-white h-auto w-auto items-center justify-center rounded-md overflow-x-auto
                                         "
                                     >
+                                        <Unlink />
                                         Disconnect
                                     </Button>
                                 </div>
                             )
                         })}
+                        
                     </div>
                 </div>
                 

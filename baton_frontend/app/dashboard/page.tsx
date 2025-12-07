@@ -18,8 +18,7 @@ export default async function DashboardPage() {
         getConnections(userId),
         getRecentTransfers(userId),
     ])
-
     return (
-        <Dashboard services={connections} transfers={transfers} disconnectService={disconnectService}/>
+        <Dashboard services={connections} transfers={transfers} userId={userId} disconnectService={disconnectService}/>
     )
 }

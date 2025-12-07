@@ -34,7 +34,7 @@ const SECTIONS: FooterSection[] = [
 
 export default function Footer() {
   return (
-    <footer className="border-t !z-2 bg-[#F8831E]">
+    <footer className="relative border-t z-100 bg-[#F8831E]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="grid gap-8 py-12 sm:grid-cols-2 md:grid-cols-4">
           <div>
@@ -44,13 +44,13 @@ export default function Footer() {
             </p>
             <div className="mt-4 flex items-center gap-3">
               <Link href="https://github.com/Kyo1y/Baton" aria-label="GitHub">
-                <Github className="h-5 w-5" />
+                <Github className="h-5 w-5 text-white" />
               </Link>
               <Link href="https:/linkedin.com/in/kyoly" aria-label="Linkedin">
-                <Linkedin className="h-5 w-5" />
+                <Linkedin className="h-5 w-5 text-white" />
               </Link>
               <Link href="mailto:sadyrbek@union.edu" aria-label="Email">
-                <Mail className="h-5 w-5" />
+                <Mail className="h-5 w-5 text-white" />
               </Link>
             </div>
           </div>

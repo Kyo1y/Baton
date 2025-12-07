@@ -9,7 +9,7 @@ export default function Process() {
             id="process"
             aria-labelledby="process"
             className="relative
-                flex pb-10 px-10 min-h-[calc(100svh-3.5rem)] items-center justify-center bg-background flex-col "
+                flex pb-10 px-10 min-h-[calc(100svh-3.5rem)] items-center justify-center bg-background flex-col"
             >
                 {/* <VantaBirdsBackground> */}
 
@@ -17,7 +17,7 @@ export default function Process() {
                 className="
                     mx-auto flex max-w-5xl flex-col items-center justify-center
                     gap-6 px-4 sm:px-6 py-8 sm:py-16
-                    text-center !z-2
+                    text-center !z-1
                     "
                 >
                     <div 
@@ -48,7 +48,7 @@ export default function Process() {
                         return (
                             <div
                             key={key}
-                            className="flex flex-col sm:flex-row items-center"
+                            className="flex flex-col sm:flex-row items-center !z-1"
                             >
                                 <div
                                 className="p-4  grid items-center justify-items-center
