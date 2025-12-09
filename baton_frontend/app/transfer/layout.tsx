@@ -11,10 +11,10 @@ export default async function TransferLayout({ children }: { children: ReactNode
     redirect("/api/auth/signin?callbackUrl=%2Ftransfer");
   }
   return <>
-    <WithMobileVantaTrunk>
+    {/* <WithMobileVantaTrunk> */}
       <TransferStepper />
       {children}
-    </WithMobileVantaTrunk>
+    {/* </WithMobileVantaTrunk> */}
     
   
   </>;

@@ -41,7 +41,6 @@ export default function VantaDotsBackground({ children }: PropsWithChildren) {
 
   return (
     <>
-    {!hideVanta ?
         <div>
             <div
                 ref={vantaRef}
@@ -49,9 +48,6 @@ export default function VantaDotsBackground({ children }: PropsWithChildren) {
             />
             {children}
         </div>
-        :
-        children
-    }
     </>
    
   );

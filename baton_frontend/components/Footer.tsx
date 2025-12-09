@@ -34,7 +34,7 @@ const SECTIONS: FooterSection[] = [
 
 export default function Footer() {
   return (
-    <footer className="relative border-t z-100 bg-[#F8831E]">
+    <footer className="relative border-t z-10 bg-[#F8831E]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="grid gap-8 py-12 sm:grid-cols-2 md:grid-cols-4">
           <div>

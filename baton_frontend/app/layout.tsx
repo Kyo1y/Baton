@@ -5,9 +5,9 @@ import { authOptions } from "@/auth";
 import './globals.css';
 import Footer from "@/components/Footer";
 import VantaDotsBackground from "@/components/vantaEffects/VantaDots";
+import { TransitionProvider } from "@/components/TransitionProvider";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
-
 
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
@@ -17,11 +17,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="en">
       <body>
+        <TransitionProvider>
           <NavBar links={links} />
-          <VantaDotsBackground children={children}/>
+          <VantaDotsBackground>
+            {children}
+          </VantaDotsBackground>
           <Footer />
+        </TransitionProvider>
 
-        
       </body>
     </html>
   );

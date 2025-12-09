@@ -2,8 +2,9 @@ import Dashboard from "@/components/Dashboard";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/auth";
-import { getConnections, getRecentTransfers } from "@/lib/data/dashboard";
-import { disconnectService } from "../(actions)/disconnectService";
+import { getConnections } from "@/lib/data/dashboard";
+import { disconnectService } from "../(actions)/dashboard/disconnectService";
+import listTransfers from "@/lib/transfers/listTransfers";
 
 export default async function DashboardPage() {
     const session = await getServerSession(authOptions);
@@ -14,11 +15,10 @@ export default async function DashboardPage() {
     }
     const userId = session.user.id;
 
-    const [connections, transfers] = await Promise.all([
-        getConnections(userId),
-        getRecentTransfers(userId),
-    ])
+    const connections = await getConnections(userId);
+
+    const { items, nextCursor } = await listTransfers(userId);
     return (
-        <Dashboard services={connections} transfers={transfers} userId={userId} disconnectService={disconnectService}/>
+        <Dashboard services={connections} transfers={items} initialCursor={nextCursor} userId={userId} disconnectService={disconnectService}/>
     )
 }

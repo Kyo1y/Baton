@@ -7,6 +7,9 @@ import { Unlink, Link } from "lucide-react";
 import { SERVICES } from "@/lib/services";
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import loadTransfers from "@/app/(actions)/dashboard/loadTransfers";
+
 
 
 
@@ -28,6 +31,7 @@ type Props = {
         srcPlaylistName: string;
         destPlaylistName: string | null;
     }[],
+    initialCursor: { id: string } | null;
     userId: string,
     disconnectService: (id: string, userId: string, provider: string) => Promise<void>,
 }
@@ -109,7 +113,7 @@ export function TransfersTable({ transfers }: { transfers: Props["transfers"] })
   );
 }
 
-export default function Dashboard({ services, transfers, userId, disconnectService }: Props) {
+export default function Dashboard({ services, transfers, initialCursor, userId, disconnectService }: Props) {
     const spotifyLogoSrc = "/logos/spotify.svg";
     const ytmusicLogoSrc = "/logos/youtube-music.svg";
     const router = useRouter();
@@ -120,6 +124,39 @@ export default function Dashboard({ services, transfers, userId, disconnectServi
         router.push(`/api/oauth/${provider}/start?return_to=/dashboard`);
     };
 
+    const [items, setItems] = useState(transfers);
+    const [cursor, setCursor] = useState(initialCursor);
+    const [loading, setLoading] = useState(false);
+    const [canShowLess, setCanShowLess] = useState(!(items.length <= 10));
+
+    async function loadMore() {
+        if (!cursor || loading) return;
+        setLoading(true);
+        setCanShowLess(true);
+        try {
+            const res = await loadTransfers({ userId, cursor, });
+            setItems(prev => [...prev, ...res.items])
+            setCursor(res.nextCursor);
+        } finally {
+            setLoading(false);
+        }
+    }
+    function showLess() {
+        if (items.length <= 10 || loading) return;
+        setLoading(true);
+        const sliceRange = items.length % 10 == 0 ? items.length - 10 : items.length - (items.length % 10);
+        const newCursor = items.length % 10 == 0 ? items[items.length - 11] : items[items.length - (items.length % 10)];
+
+        const shortenedItems = items.slice(0, sliceRange);
+        setItems(shortenedItems);
+        setCursor(newCursor);
+        setLoading(false);
+        if (shortenedItems.length <= 10) {
+            setCanShowLess(false);
+        }
+        return;
+        
+    }
     
     return (
         <section
@@ -137,7 +174,7 @@ export default function Dashboard({ services, transfers, userId, disconnectServi
                 >
                     <h1 className="text-2xl font-bold">Connections</h1>
                     <div
-                        className="flex flex-row gap-2 lg:flex-col"
+                        className="flex flex-row gap-3 lg:flex-col"
                     >
                         {disconnected.map((s) => {
                             const imgSrc = s == "spotify" ? spotifyLogoSrc : ytmusicLogoSrc;
@@ -199,7 +236,6 @@ export default function Dashboard({ services, transfers, userId, disconnectServi
                                 </div>
                             )
                         })}
-                        
                     </div>
                 </div>
                 
@@ -209,7 +245,26 @@ export default function Dashboard({ services, transfers, userId, disconnectServi
                     className="flex flex-col gap-7"
                 >
                     <h1 className="text-2xl font-bold">History</h1>
-                    <TransfersTable transfers={transfers} />
+                    <TransfersTable transfers={items} />
+                    <div
+                        className="flex justify-end gap-5 w-[100%]"
+                    >
+                        <Button
+                        onClick={loadMore}
+                        disabled={!cursor || loading}
+                        className="cursor-pointer bg-[#F8831E] hover:bg-[#FF9538] disabled:opacity-[0.6]"
+                        >
+                            {loading ? "Loading..." : cursor ? "Load more" : "No more"}
+                        </Button>
+                        <Button
+                        disabled={!canShowLess || loading}
+                        onClick={showLess}
+                        className="cursor-pointer bg-[#3f3f3f] hover:bg-[#505050] disabled:opacity-[0.6]"
+                        >
+                            Show less
+                        </Button>
+                    </div>
+                    
                 </div>
                 
             </div>

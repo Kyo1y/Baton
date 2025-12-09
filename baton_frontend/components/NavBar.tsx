@@ -1,27 +1,27 @@
 "use client"
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Sheet, SheetTrigger, SheetContent, SheetClose, SheetTitle } from "@/components/ui/sheet"
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetTrigger, SheetContent, SheetClose, SheetTitle } from "@/components/ui/sheet";
 import {
   NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuLink
-} from "@/components/ui/navigation-menu"
-import type { NavLink } from "@/nav.config"
+} from "@/components/ui/navigation-menu";
+import type { NavLink } from "@/nav.config";
 import { BrandLogo } from "@/components/Logo";
-import { LogoMark } from "@/components/Logo"
+import { LogoMark } from "@/components/Logo";
 import { loginGoogle } from "@/lib/auth-client";
-import VantaFogBackground from "./vantaEffects/VantaFog"
+import { usePageTransition } from "./TransitionProvider";
+import { useState } from "react";
 
 export default function NavBar({links}: {links: NavLink[]}) {
   const pathname = usePathname()
   const isAuthed = links.some(i => i.label.toLowerCase() === "dashboard");
+  const { startTransition } = usePageTransition();
+  const [sheetOpen, setSheetOpen] = useState(false);
   return (
       <header className="sticky top-0 z-40 bg-background/40
             backdrop-blur-md shadow-md">
-
-      {/* <VantaFogBackground> */}
-
 
       <div className="mx-auto flex h-16 max-w-9xl items-center justify-between px-4">
         
@@ -69,20 +69,24 @@ export default function NavBar({links}: {links: NavLink[]}) {
                     href={l.href}
                     data-active={pathname === l.href}
                     className="px-2 py-1 text-lg data-[active=true]:font-medium"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      startTransition(l.href);
+                    }}
                   >
-                    {l.label}
+                      {l.label}
                   </NavigationMenuLink>
                 </NavigationMenuItem>
             ))}
             </NavigationMenuList>
           </NavigationMenu>
-          {isAuthed && <Button asChild className="bg-[#F8831E] hover:bg-[#EB7107]"><Link href="/dashboard">Dashboard</Link></Button>}
+          {isAuthed && <Button className="bg-[#F8831E] hover:bg-[#EB7107] cursor-pointer" onClick={() => startTransition("/dashboard")}>Dashboard</Button>}
 
         </div>
 
         {/* Mobile */}
         <div className="md:hidden" aria-describedby="sidebar">
-          <Sheet >
+          <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
             <SheetTrigger asChild>
               <Button variant="outline" size="icon" aria-label="Menu" className="p-1">☰</Button>
             </SheetTrigger>
@@ -94,7 +98,7 @@ export default function NavBar({links}: {links: NavLink[]}) {
                   <LogoMark className="h-full w-full text-foreground object-contain group-hover:[&>path]:fill-[#F8831E]" />
                 </div>
               </div>
-              <nav className="mt-10 grid z-10">
+              <nav className="mt-10 grid z-1000">
                 {links
                 .map(l => l.label == "Sign in" ? (
                   <button
@@ -107,16 +111,19 @@ export default function NavBar({links}: {links: NavLink[]}) {
                     Google
                   </button>
                 ) : (
-                  <SheetClose asChild
-                  key={l.href}
-                  >
                     <Link 
+                    key={l.href}
                     href={l.href}
                     data-active={pathname === l.href}
-                    className="rounded data-[active=true]:font-bold px-3 py-2 hover:bg-accent">
+                    className="rounded data-[active=true]:font-bold px-3 py-2 hover:bg-accent"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      startTransition(l.href);
+                      setSheetOpen(false);
+                    }}
+                    >
                       {l.label}
                     </Link>
-                  </SheetClose>
                   ))
                 }
               </nav>
@@ -125,7 +132,6 @@ export default function NavBar({links}: {links: NavLink[]}) {
         </div>
 
       </div>
-      {/* </VantaFogBackground> */}
     </header>
 
   )

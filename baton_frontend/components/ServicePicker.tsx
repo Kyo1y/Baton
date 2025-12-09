@@ -46,9 +46,9 @@ export default function ServicePicker({ title, subtitle, exclude = [], mode, sou
                             <Button
                             key={service.slug}
                             className={clsx(
-                                `flex flex-col bg-[#F1F1F1] p-2 h-auto items-center justify-center rounded-[1.25rem] cursor-pointer border`,
+                                `flex flex-col bg-[#F1F1F1] p-2 h-auto items-center justify-center rounded-[1.25rem] cursor-pointer border z-2`,
                                 isSelected ?
-                                "bg-white border border-[#F8831E] hover:bg-white "
+                                "bg-white border border-[#F8831E] hover:bg-white"
                                 :
                                 "hover:bg-[#F2F2F2] hover:shadow-lg"
                             )}
@@ -68,7 +68,7 @@ export default function ServicePicker({ title, subtitle, exclude = [], mode, sou
                     <Button
                         disabled={!selected}
                         className={clsx(
-                                "flex flex-col p-2 border bg-[#CDCDCD] hover:bg-[#CDCDCD] text-muted-foreground h-auto w-auto items-center justify-center rounded-xl overflow-x-auto",
+                                "flex flex-col p-2 border bg-[#CDCDCD] hover:bg-[#CDCDCD] text-muted-foreground h-auto w-auto items-center justify-center rounded-xl overflow-x-auto z-2",
                                 selected ?
                                     "bg-white border-[#F8831E] hover:bg-white text-black cursor-pointer  border"
                                     : " border"
