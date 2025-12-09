@@ -38,7 +38,7 @@ export default function Footer() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="grid gap-8 py-12 sm:grid-cols-2 md:grid-cols-4">
           <div>
-            <Link href="/" className="font-semibold">Baton</Link>
+            <Link href="/" className="font-semibold text-white">Baton</Link>
             <p className="mt-2 text-sm text-white">
               Move playlists between services in minutes.
             </p>
@@ -57,7 +57,7 @@ export default function Footer() {
 
           {SECTIONS.map((sec) => (
             <div key={sec.heading} className="z-1">
-              <h4 className="text-sm font-semibold">{sec.heading}</h4>
+              <h4 className="text-sm text-white font-semibold">{sec.heading}</h4>
               <ul className="mt-3 space-y-2">
                 {sec.links.map((l) => (
                   <li key={l.href}>

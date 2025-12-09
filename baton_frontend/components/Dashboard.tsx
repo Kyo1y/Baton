@@ -75,8 +75,8 @@ export function TransfersTable({ transfers }: { transfers: Props["transfers"] })
             "
         >
             <table className="w-full table-fixed border-collapse text-sm !z-1">
-                <thead className="bg-gray-50">
-                <tr className="border-b text-left text-muted-foreground">
+                <thead className="bg-gray-50 dark:bg-black sticky top-0 z-3 ">
+                <tr className="text-left text-muted-foreground sticky top-0 dark:text-white border-b dark:border-b">
                     <th className="py-2 !z-1 pl-3 tracking-wide text-left pr-4 font-medium w-[14rem]">Created</th>
                     <th className="py-2 !z-1 tracking-wide text-left pr-4 font-medium w-[8rem]">Status</th>
                     <th className="py-2 !z-1 tracking-wide text-left pr-4 font-medium w-[9rem]">Source</th>
@@ -181,7 +181,7 @@ export default function Dashboard({ services, transfers, initialCursor, userId, 
                             return (
                                 <div
                                 key={s + "_disconnected"}
-                                className="flex flex-col p-5 border-1 rounded-xl items-center h-fit w-fit gap-2 bg-white"
+                                className="flex flex-col p-5 border-1 rounded-xl items-center h-fit w-fit gap-2 bg-white dark:bg-black"
                                 >
                                     <Image 
                                         src={imgSrc}
@@ -211,7 +211,7 @@ export default function Dashboard({ services, transfers, initialCursor, userId, 
                             return (
                                 <div
                                 key={s.provider}
-                                className="flex flex-col p-5 border-1 rounded-xl items-center h-fit w-fit gap-2 bg-white"
+                                className="flex flex-col p-5 border-1 rounded-xl items-center h-fit w-fit gap-2 bg-white dark:bg-black"
                                 >
                                     <Image 
                                         src={imgSrc}
@@ -259,7 +259,7 @@ export default function Dashboard({ services, transfers, initialCursor, userId, 
                         <Button
                         disabled={!canShowLess || loading}
                         onClick={showLess}
-                        className="cursor-pointer bg-[#3f3f3f] hover:bg-[#505050] disabled:opacity-[0.6]"
+                        className="cursor-pointer bg-[#3f3f3f] hover:bg-[#505050] disabled:opacity-[0.6] dark:bg-[#7C7C7C] dark:hover:bg-[#979797]"
                         >
                             Show less
                         </Button>

@@ -19,22 +19,20 @@ type Props = {
 export default function ServicePicker({ title, subtitle, exclude = [], mode, source }: Props) {
     const [selected, setSelected] = useState<string | null>(null);
     const router = useRouter();
-    const servicesHeights = SERVICES.map(s => s.height);
-    const maxServiceHeight = Math.max(...servicesHeights)
     const visible = SERVICES.filter(s => !exclude.includes(s.slug));
     const hrefFor = (slug: string) =>
     mode === "source" ? `/transfer/${slug}` : `/transfer/${source}/${slug}`;
 
     return (
         <section id="source-service !z-2">
-            <div className="flex flex-col justify-center items-center gap-7 p-[2rem] pb-[13rem] ">
+            <div className="flex flex-col justify-center items-center gap-7 p-[2rem] pb-[13rem]">
                 <div className="flex flex-col justify-center items-center gap-2">
                     <h1 
-                    className="text-balance font-bold tracking-tight
+                    className="text-balance font-bold tracking-tight z-2
                     text-xl sm:text-2xl md:text-3xl">
                         {title}
                     </h1>
-                    <p className="text-balance max-w-prose text-base text-md sm:text-lg text-muted-foreground">
+                    <p className="text-balance max-w-prose text-base text-md sm:text-lg text-muted-foreground z-2">
                         {subtitle}
                     </p>
                 </div>

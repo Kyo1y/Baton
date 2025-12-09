@@ -42,13 +42,11 @@ export default function TransferRunner({ transferDraftId, source, dest, userId }
   useEffect(() => {
     if (status !== "failed") return;
 
-    // avoid loops if it's already present
     if (searchParams.get("completion") === "failed") return;
 
     const params = new URLSearchParams(searchParams.toString());
     params.set("completion", "failed");
 
-    // replace so you don't stack history entries
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   }, [status, pathname, searchParams, router]);
 
@@ -68,15 +66,6 @@ export default function TransferRunner({ transferDraftId, source, dest, userId }
   return (
     <div className="mx-auto max-w-xl p-6">
       {showOverlay && <ProcessingOverlay />}
-      {/* {!showOverlay && status === "success" && (
-        <SuccessView source={result!.destPlaylistName} dest={result!.srcPlaylistName} result={result!} />
-      )}
-      {!showOverlay && status === "partial" && (
-        <SuccessView source={result!.destPlaylistName} dest={result!.srcPlaylistName} result={result!} note="Some tracks couldn't be matched." />
-      )}
-      {!showOverlay && status === "failed" && (
-        <ErrorView message={error ?? "Something went wrong."} onBack={() => router.push(`/transfer/${source}/${dest}`)} />
-      )} */}
     </div>
   );
 }

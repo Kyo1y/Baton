@@ -12,13 +12,13 @@ export default function TransitionOverlay({ active }: Props) {
         <AnimatePresence>
             {active && (
                 <motion.div
-                className="fixed inset-0 z-[9999] flex items-center justify-center bg-white"
-                initial={{ y: "100%" }}   // start off-screen at the bottom
-                animate={{ y: 0 }}        // slide into the center
-                exit={{ y: "-100%" }}     // slide off-screen at the top
+                className="fixed inset-0 z-[9999] flex items-center justify-center bg-white dark:bg-black"
+                initial={{ y: "100%" }}
+                animate={{ y: 0 }}
+                exit={{ y: "-100%" }}
                 transition={{
                     duration: 0.7,
-                    ease: [0.22, 1, 0.36, 1], // nice “easeOutExpo-ish” curve
+                    ease: [0.22, 1, 0.36, 1],
                 }}
                 >
                     <LogoMark className="h-50 w-50"/>

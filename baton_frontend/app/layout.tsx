@@ -6,6 +6,7 @@ import './globals.css';
 import Footer from "@/components/Footer";
 import VantaDotsBackground from "@/components/vantaEffects/VantaDots";
 import { TransitionProvider } from "@/components/TransitionProvider";
+import { ThemeProvider } from "@/components/theme/theme-provider";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
@@ -17,13 +18,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="en">
       <body>
-        <TransitionProvider>
+        <ThemeProvider>
+          <TransitionProvider>
           <NavBar links={links} />
           <VantaDotsBackground>
             {children}
           </VantaDotsBackground>
           <Footer />
         </TransitionProvider>
+        </ThemeProvider>
 
       </body>
     </html>

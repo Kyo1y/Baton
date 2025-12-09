@@ -12,7 +12,29 @@ import { BrandLogo } from "@/components/Logo";
 import { LogoMark } from "@/components/Logo";
 import { loginGoogle } from "@/lib/auth-client";
 import { usePageTransition } from "./TransitionProvider";
-import { useState } from "react";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
+
+export function ThemeToggle() {
+  const { theme, setTheme, systemTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
+  if (!mounted) return null;
+
+  const current = theme === "system" ? systemTheme : theme;
+
+  return (
+    <button
+      onClick={() => setTheme(current === "dark" ? "light" : "dark")}
+      className="rounded-full border px-3 py-1 text-sm cursor-pointer"
+    >
+      {current === "dark" ? "☀️ Light" : "🌙 Dark"}
+    </button>
+  );
+}
+
 
 export default function NavBar({links}: {links: NavLink[]}) {
   const pathname = usePathname()
@@ -31,6 +53,10 @@ export default function NavBar({links}: {links: NavLink[]}) {
           <BrandLogo />
           <Link
           href={"/"}
+          onClick={(e) => {
+            e.preventDefault();
+            startTransition("/");
+          }}
           >
             <h1 
             className="text-balance font-bold tracking-tight
@@ -81,7 +107,7 @@ export default function NavBar({links}: {links: NavLink[]}) {
             </NavigationMenuList>
           </NavigationMenu>
           {isAuthed && <Button className="bg-[#F8831E] hover:bg-[#EB7107] cursor-pointer" onClick={() => startTransition("/dashboard")}>Dashboard</Button>}
-
+          <ThemeToggle />
         </div>
 
         {/* Mobile */}
@@ -126,6 +152,7 @@ export default function NavBar({links}: {links: NavLink[]}) {
                     </Link>
                   ))
                 }
+                <ThemeToggle />
               </nav>
             </SheetContent>
           </Sheet>

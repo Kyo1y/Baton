@@ -134,7 +134,6 @@ export default function PlaylistPicker( { source, dest, userId, sourcePlaylists,
                                         "bg-[#F8831E] p-1.5 border-[#F8831E] hover:bg-[#fc953d] text-white cursor-pointer"
                                         : ""
                                 )}
-                                //onTransfer or onTransfer()?
                             onClick={() => { onTransfer() }} 
                         >
                             Transfer

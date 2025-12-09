@@ -1,6 +1,7 @@
 // components/Logo.tsx
 import * as React from "react";
 import Link from "next/link";
+import { usePageTransition } from "./TransitionProvider";
 
 export function LogoMark({
   className = "",
@@ -22,7 +23,7 @@ export function LogoMark({
       />
       <path
         d="M139.46 102.374C96.4695 22.4708 66.1139 27.2717 74.8632 101.268L20.8644 22.7618L165.451 22.2052L139.46 102.374Z"
-        className="stroke-[#000000]"
+        className="stroke-current"
       />
       <path
         d="M124.93 114.616C81.9388 34.7123 51.5832 39.5132 60.3326 113.51L6.33377 35.0033L150.92 34.4468L124.93 114.616Z"
@@ -33,8 +34,12 @@ export function LogoMark({
 }
 
 export function BrandLogo() {
+  const { startTransition } = usePageTransition()
   return (
-    <Link href="/" aria-label="Home" className="group inline-flex items-center">
+    <Link href="/" aria-label="Home" className="group inline-flex items-center" onClick={(e) => {
+                      e.preventDefault();
+                      startTransition("/");
+                    }}>
       {/* stroke uses currentColor; fill becomes orange on hover */}
       <LogoMark className="text-foreground group-hover:[&>path]:fill-[#F8831E] group-hover:[&>path:nth-of-type(2)]:fill-[#F8831E] group-hover:[&>path:nth-of-type(3)]:fill-[#F8831E]" />
     </Link>

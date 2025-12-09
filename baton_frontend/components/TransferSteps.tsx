@@ -19,7 +19,6 @@ function computeCurrent(pathname: string): number {
   if (depth === 3) return 3;
   if (depth === 4) return 4;
   if (depth >= 5) return 5;
-  console.log(depth)
   return 1;
 }
 

@@ -11,8 +11,6 @@ export default function WhyBaton() {
         className="relative
             flex pb-10 px-10 min-h-[calc(70svh-3.5rem)] items-center justify-center bg-background flex-col"
         >
-            {/* <VantaBirdsBackground> */}
-
             <div
             className="
                 mx-auto flex max-w-5xl flex-col items-center justify-center
@@ -75,8 +73,6 @@ export default function WhyBaton() {
                 })}
 
             </div>
-            {/* </VantaBirdsBackground> */}
-
         </section>
     )
 }

@@ -1,7 +1,6 @@
 "use client"
 import Link from "next/link"
 import { Button } from "./ui/button"
-import VantaBirdsBackground from "./vantaEffects/VantaBirds"
 
 export default function Prompt() {
     return (
@@ -11,8 +10,6 @@ export default function Prompt() {
             className="relative
                 flex  pb-20 min-h-[calc(20svh)] items-center justify-center bg-background flex-col"
             >
-                {/* <VantaBirdsBackground> */}
-
                 <div
                 className="rounded-md border-1 border-[#F8831E] p-5 sm:p-10 flex flex-col gap-2 !z-1"
                 >
@@ -22,7 +19,7 @@ export default function Prompt() {
                             text-4xl sm:text-5xl md:text-6xl
                         "
                     >
-                        Ready to move  <span className="block pr-1.5 text-[#F8831E]"> your <span className="!text-black">music?</span></span>
+                        Ready to move  <span className="block pr-1.5 text-[#F8831E]"> your </span><span className="">music?</span>
                     </h1>
                     <p
                         className="text-balance max-w-prose text-base sm:text-xl text-muted-foreground "
@@ -45,9 +42,6 @@ export default function Prompt() {
                         </Button>
                     </div>
                 </div>
-                {/* </VantaBirdsBackground> */}
-
             </section>
     )
-    
 }

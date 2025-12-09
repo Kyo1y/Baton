@@ -2,9 +2,10 @@
 import Link from "next/link"
 import { Button } from "./ui/button"
 import ServicesList from "./ServicesList"
-import VantaBirdsBackground from "./vantaEffects/VantaBirds"
+import { usePageTransition } from "./TransitionProvider"
 
 export default function HomeIntro() {
+    const { startTransition } = usePageTransition();
     return (
 
         <section
@@ -40,7 +41,11 @@ export default function HomeIntro() {
 
                 <div className="flex w-full flex-col items-center justify-center gap-3 sm:w-auto sm:flex-row">
                     <Button asChild className="group bg-[#F8831E] hover:bg-[#FF8E2C] gap-1">
-                        <Link href="/transfer">
+                        <Link href="/transfer"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            startTransition("/transfer");
+                        }}>
                         Start Transfer
                         <span
                             aria-hidden="true"

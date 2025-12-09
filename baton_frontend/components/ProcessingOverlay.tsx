@@ -19,10 +19,8 @@ export default function ProcessingOverlay({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* blur + dim background */}
       <div className="absolute inset-0 bg-background/60 backdrop-blur-sm" />
 
-      {/* content card */}
       <div className="relative z-10 flex w-[min(90vw,28rem)] flex-col items-center gap-4 rounded-2xl border bg-card p-6 shadow-xl">
         <Image
           src={gifSrc}
@@ -30,11 +28,10 @@ export default function ProcessingOverlay({
           width={128}
           height={128}
           className="h-full w-full object-contain"
-          unoptimized // allows animated gif without Next optimization
+          unoptimized
           priority
         />
 
-        {/* Progress bar */}
         {determinate ? (
           <div className="w-full">
             <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
@@ -56,7 +53,6 @@ export default function ProcessingOverlay({
         <p className="mt-1 text-xs text-muted-foreground uppercase tracking-wide">{note}</p>
       </div>
 
-      {/* keyframes for indeterminate bar */}
       <style jsx>{`
         @keyframes slide {
           0% { transform: translateX(-100%); }
