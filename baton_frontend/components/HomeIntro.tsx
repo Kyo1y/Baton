@@ -56,7 +56,7 @@ export default function HomeIntro() {
                         </Link>
                     </Button>
 
-                    <Button asChild className="text-black shadow-none bg-[#FFFFF] hover:bg-[#F1F1F1] gap-1">
+                    <Button asChild className="text-black dark:hover:text-black dark:text-white shadow-none bg-[#FFFFF] hover:bg-[#F1F1F1] gap-1">
                             <Link href={"/demo"}>Watch Demo</Link>
                     </Button>
 

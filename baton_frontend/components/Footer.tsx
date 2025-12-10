@@ -1,38 +1,49 @@
-// components/Footer.tsx
+"use client"
+
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import { Github, Linkedin, Mail } from "lucide-react";
+import type { NavLink } from "@/nav.config";
+import { usePageTransition } from "./TransitionProvider";
+
 
 type FooterLink = { label: string; href: string };
 type FooterSection = { heading: string; links: FooterLink[] };
 
-const SECTIONS: FooterSection[] = [
+const BASE_SECTIONS: FooterSection[] = [
   {
     heading: "Product",
     links: [
       { label: "Features", href: "/#features" },
       { label: "Process", href: "/#process" },
-      { label: "Dashboard", href: "/dashboard" },
     ],
   },
   {
     heading: "Project",
     links: [
-      { label: "About", href: "/about" },
-      { label: "Blog", href: "/blog" },
     ],
   },
   {
     heading: "Support",
     links: [
-      { label: "Docs", href: "/docs" },
-      { label: "Status", href: "/status" },
-      { label: "Contact", href: "/contact" },
     ],
   },
 ];
 
-export default function Footer() {
+export default function Footer({ links }: {links: NavLink[]}) {
+  const sections = BASE_SECTIONS.map((s) => {
+    const category = s.heading.trim().toLowerCase();
+
+    const dynamicLinks = links
+                        .filter((l) => l.category?.toLowerCase() === category)
+                        .map((l) => ({ label: l.label, href: l.href }));
+    return {
+      ...s,
+      links: [...s.links, ...dynamicLinks]
+    };
+  })
+  const { startTransition } = usePageTransition();
+  
   return (
     <footer className="relative border-t z-10 bg-[#F8831E]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
@@ -49,13 +60,13 @@ export default function Footer() {
               <Link href="https:/linkedin.com/in/kyoly" aria-label="Linkedin">
                 <Linkedin className="h-5 w-5 text-white" />
               </Link>
-              <Link href="mailto:sadyrbek@union.edu" aria-label="Email">
+              <Link href="mailto:sadyrbekov.kairat@gmail.com" aria-label="Email">
                 <Mail className="h-5 w-5 text-white" />
               </Link>
             </div>
           </div>
 
-          {SECTIONS.map((sec) => (
+          {sections.map((sec) => (
             <div key={sec.heading} className="z-1">
               <h4 className="text-sm text-white font-semibold">{sec.heading}</h4>
               <ul className="mt-3 space-y-2">
@@ -63,6 +74,10 @@ export default function Footer() {
                   <li key={l.href}>
                     <Link
                       href={l.href}
+                      onClick={(e) => {
+                          e.preventDefault();
+                          startTransition(l.href);
+                      }}
                       className="text-sm text-white hover:underline hover:decoration-dotted"
                     >
                       {l.label}

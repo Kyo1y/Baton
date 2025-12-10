@@ -34,7 +34,7 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
 
             window.setTimeout(() => {
                 router.push(href);
-            }, ANIM_DURATION * 0.2);
+            }, ANIM_DURATION * 0.5);
 
             window.setTimeout(() => {
                 setIsTransitioning(false);

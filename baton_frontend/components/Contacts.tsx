@@ -24,7 +24,7 @@ export default function Contacts() {
                     Contacts
                 </h1>
                 <p
-                className="text-balance max-w-prose text-base sm:text-xl"
+                className="text-balance max-w-prose text-base sm:text-xl z-2"
                 >
                     Email me at sadyrbekov.kairat@gmail.com about anything, including Baton.
                     <br/><br/>

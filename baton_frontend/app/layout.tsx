@@ -24,7 +24,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <VantaDotsBackground>
             {children}
           </VantaDotsBackground>
-          <Footer />
+          <Footer links={links}/>
         </TransitionProvider>
         </ThemeProvider>
 

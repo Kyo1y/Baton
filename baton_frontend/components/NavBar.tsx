@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetTrigger, SheetContent, SheetClose, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetTrigger, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import {
   NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuLink
 } from "@/components/ui/navigation-menu";
@@ -28,7 +28,7 @@ export function ThemeToggle() {
   return (
     <button
       onClick={() => setTheme(current === "dark" ? "light" : "dark")}
-      className="rounded-full border px-3 py-1 text-sm cursor-pointer"
+      className="rounded-full border px-4 py-1 text-sm cursor-pointer border-black z-5 bg-white dark:bg-black dark:border-white"
     >
       {current === "dark" ? "☀️ Light" : "🌙 Dark"}
     </button>
@@ -73,7 +73,6 @@ export default function NavBar({links}: {links: NavLink[]}) {
           <NavigationMenu>
             <NavigationMenuList>
               {links
-              .filter(l => l.label.trim().toLowerCase() !== "dashboard")
               .map(l => l.label == "Sign in" ? (
                 <NavigationMenuItem key={l.href}>
                   <NavigationMenuLink asChild>
@@ -89,6 +88,12 @@ export default function NavBar({links}: {links: NavLink[]}) {
                     </button>
                   </NavigationMenuLink>
                 </NavigationMenuItem>
+            ) : l.label.trim().toLowerCase() == "dashboard" ? (
+              <div
+              key={"not-dashboard"}
+              className="hidden"
+              >
+              </div>
             ) : (
               <NavigationMenuItem key={l.href}>
                   <NavigationMenuLink
@@ -104,9 +109,24 @@ export default function NavBar({links}: {links: NavLink[]}) {
                   </NavigationMenuLink>
                 </NavigationMenuItem>
             ))}
+                {isAuthed &&
+                  <NavigationMenuItem key={"/dashboard"}>
+                    <NavigationMenuLink
+                      href={"/dashboard"}
+                      data-active={pathname === "/dashboard"}
+                      className="px-4 py-1.5 text-md text-white rounded-lg bg-[#F8831E] data-[active=true]:font-medium"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        startTransition("/dashboard");
+                      }}
+                    >
+                        Dashboard
+                    </NavigationMenuLink>
+                  </NavigationMenuItem>
+                  }
             </NavigationMenuList>
           </NavigationMenu>
-          {isAuthed && <Button className="bg-[#F8831E] hover:bg-[#EB7107] cursor-pointer" onClick={() => startTransition("/dashboard")}>Dashboard</Button>}
+
           <ThemeToggle />
         </div>
 
@@ -152,7 +172,12 @@ export default function NavBar({links}: {links: NavLink[]}) {
                     </Link>
                   ))
                 }
+                <div
+                className="flex justify-center"
+                >
                 <ThemeToggle />
+
+                </div>
               </nav>
             </SheetContent>
           </Sheet>

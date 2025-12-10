@@ -62,15 +62,15 @@ export default function TransferStepper({ override }: { override?: number }) {
                   { (() => {
                     if (stepNum == 5) {
                       if (failed) {
-                        return <X className="size-4" />
+                        return <X className="size-4 text-[#FF4242]" />
                       }
                       else if (isCompleted) {
-                        return <Check className="size-4" />
+                        return <Check className="size-4 text-[#F8831E]" />
                       }
                     }
                     else {
                       if (isCompleted) {
-                        return <Check className="size-4" />
+                        return <Check className="size-4 text-[#F8831E]" />
                       }
                       else {
                         return stepNum;
