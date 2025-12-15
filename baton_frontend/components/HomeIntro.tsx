@@ -34,7 +34,7 @@ export default function HomeIntro() {
                 Move your music <span className="block text-[#F8831E]">anywhere</span>
                 </h1>
 
-                <p className="text-balance max-w-prose text-base sm:text-xl text-muted-foreground">
+                <p className="text-balance max-w-prose text-base sm:text-xl text-muted-foreground dark:text-[#B6B6B6]">
                 Seamlessly transfer your playlists, liked songs, and music library between any streaming service.
                 <br className="hidden sm:block" /> No more starting from scratch.
                 </p>
@@ -62,11 +62,7 @@ export default function HomeIntro() {
 
                 </div>
                 <ServicesList />
-
             </div>
-            {/* </VantaBirdsBackground> */}
-
-
         </section>
 
     )

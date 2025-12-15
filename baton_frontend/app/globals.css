@@ -126,3 +126,11 @@ body.is-transitioning {
   overflow: hidden;
   
 }
+.main-cont {
+  justify-content: space-between;
+}
+.content-cont {
+  display: flex;
+  flex-direction: column;
+  justify-content: center !important;
+}

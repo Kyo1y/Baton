@@ -136,7 +136,7 @@ export default function NavBar({links}: {links: NavLink[]}) {
             <SheetTrigger asChild>
               <Button variant="outline" size="icon" aria-label="Menu" className="p-1">☰</Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-64 [&>button]:p-1 [&>button]:translate-x-[-2]" dialong-title="sidebar" >
+            <SheetContent side="right" className="w-64 [&>button]:p-1 [&>button]:translate-x-[-2] z-100" dialong-title="sidebar" >
               <SheetTitle className="sr-only">menu</SheetTitle>
               {/* Background image */}
               <div className="absolute translate-x-30 translate-y-10 inset-0 flex items-center justify-center pointer-events-none">
@@ -144,7 +144,7 @@ export default function NavBar({links}: {links: NavLink[]}) {
                   <LogoMark className="h-full w-full text-foreground object-contain group-hover:[&>path]:fill-[#F8831E]" />
                 </div>
               </div>
-              <nav className="mt-10 grid z-1000">
+              <nav className="mt-10 grid z-100000">
                 {links
                 .map(l => l.label == "Sign in" ? (
                   <button

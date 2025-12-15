@@ -38,7 +38,6 @@ export default function TransferStepper({ override }: { override?: number }) {
       <ol className="flex flex-wrap items-center gap-4">
         {STEPS.map((label, idx) => {
           const stepNum = idx + 1;
-          console.log(stepNum)
           let isCompleted = stepNum < current;
           let isActive = stepNum === current;
           if (stepNum == 5) {

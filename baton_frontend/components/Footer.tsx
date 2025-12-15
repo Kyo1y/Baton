@@ -45,11 +45,18 @@ export default function Footer({ links }: {links: NavLink[]}) {
   const { startTransition } = usePageTransition();
   
   return (
-    <footer className="relative border-t z-10 bg-[#F8831E]">
+    <footer className="relative border-t z-10 bg-[#F8831E] justify-self-end w-[100%]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="grid gap-8 py-12 sm:grid-cols-2 md:grid-cols-4">
           <div>
-            <Link href="/" className="font-semibold text-white">Baton</Link>
+            <Link href="/" className="font-semibold text-white"
+              onClick={(e) => {
+              e.preventDefault();
+              startTransition("/");
+            }}
+            >
+              Baton
+            </Link>
             <p className="mt-2 text-sm text-white">
               Move playlists between services in minutes.
             </p>
@@ -93,8 +100,21 @@ export default function Footer({ links }: {links: NavLink[]}) {
         <div className="flex flex-col-reverse items-center justify-between gap-2 py-6 text-sm text-white md:flex-row">
           <p>© {new Date().getFullYear()} Baton. No rights reserved.</p>
           <div className="flex items-center gap-4">
-            <Link href="/terms">Terms</Link>
-            <Link href="/privacy">Privacy</Link>
+            <Link href="/terms" 
+              onClick={(e) => {
+              e.preventDefault();
+              startTransition("/terms");
+            }}>
+            Terms
+            </Link>
+            <Link href="/privacy"
+              onClick={(e) => {
+              e.preventDefault();
+              startTransition("/privacy");
+            }}
+            >
+            Privacy
+            </Link>
           </div>
         </div>
       </div>

@@ -41,10 +41,10 @@ export default function VantaDotsBackground({ children }: PropsWithChildren) {
 
   return (
     <>
-        <div>
+        <div className="self-center">
             <div
                 ref={vantaRef}
-                className="fixed inset-0 z-1 pointer-events-none"
+                className="fixed inset-0 z-1 pointer-events-none "
             />
             {children}
         </div>

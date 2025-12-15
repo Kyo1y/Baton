@@ -16,15 +16,20 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const links = buildNav({ isAuthed: !!session });
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body>
         <ThemeProvider>
           <TransitionProvider>
-          <NavBar links={links} />
-          <VantaDotsBackground>
-            {children}
-          </VantaDotsBackground>
-          <Footer links={links}/>
+            <div className="main-cont min-h-screen flex flex-col">
+              <NavBar links={links} />
+              <VantaDotsBackground>
+                <div className="content-cont flex flex-col flex-1 justify-center">
+                  {children}
+                </div>
+              </VantaDotsBackground>
+              <Footer links={links}/>
+            </div>
+          
         </TransitionProvider>
         </ThemeProvider>
 
