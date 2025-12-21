@@ -23,6 +23,23 @@ model User {
   sessions      Session[]
   telegramId    String?    @unique
   integrationTokens IntegrationToken[]
+  providerProfiles  ProviderProfile[]
+}
+
+model ProviderProfile {
+  id            String @id @default(cuid())
+  userId        String
+  provider      String
+  providerId    String
+  username      String
+  image         String?
+  createdAt     DateTime @default(now())
+  deletedAt     DateTime?
+  user          User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, provider])
+  @@unique([provider, providerId])
+  @@index([provider, providerId])
 }
 
 model Account {
@@ -90,6 +107,7 @@ model CanonicalTrack {
 }
 
 enum TransferStatus {
+  CREATED
   RUNNING
   SUCCESS
   PARTIAL
@@ -108,11 +126,14 @@ model TransferDraft {
   destDraftName     String?
   destDraftIsPublic Boolean?
   destPlaylistName  String?
-  status            TransferStatus @default(RUNNING)
+  status            TransferStatus @default(CREATED)
   added             Int @default(0)
   failed            Int @default(0)
+  copies            Int @default(0)
   errorMessage      String?
   createdAt         DateTime @default(now())
+  startedAt         DateTime?
+
 
   @@index([userId, source, dest])
   @@index([userId, status, createdAt])
