@@ -1,4 +1,3 @@
-// components/ServicePicker.tsx
 "use client";
 
 import { SERVICES } from "@/lib/services";

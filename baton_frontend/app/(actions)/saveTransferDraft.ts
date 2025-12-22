@@ -1,7 +1,6 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-/* check if destDraft? won't cause trouble */
 export async function saveTransferDraft(params: {
   userId: string,
   source: string,

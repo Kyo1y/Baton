@@ -1,0 +1,3 @@
+packages:
+  - baton_frontend
+  - packages/*

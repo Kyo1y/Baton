@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { Check } from "lucide-react";
 import { X } from "lucide-react";
 import clsx from "clsx";

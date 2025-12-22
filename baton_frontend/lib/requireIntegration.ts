@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { prisma } from "./prisma";
 import { OAUTH } from "@/integrations/providers";
-import ensureAccessToken from "./ensureAccessToken";
 
 export const runtime = "nodejs";
 

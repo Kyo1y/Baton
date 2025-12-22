@@ -1,7 +1,6 @@
 "use server";
 
 import { runTransfer } from "@/lib/transfer/runTransfer";
-import type { TransferDraft } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { TransferStatus } from "@prisma/client";
 
@@ -11,9 +10,7 @@ export async function finalizeTransfer(transferId: string) {
     where: { id: transferId, status: TransferStatus.CREATED, startedAt: null},
     data: { status: TransferStatus.RUNNING, startedAt: new Date() }
   })
-  console.log("JOB CLAIMED:", claimed.count)
   if (claimed.count === 0) {
-    // Someone else already started (or it finished). Read the latest row and exit.
     const t = await prisma.transferDraft.findUnique({ where: { id: transferId }});
     if (!t) throw new Error("Transfer data lost. Please try again")
     if (t.status == TransferStatus.RUNNING) {
@@ -21,7 +18,6 @@ export async function finalizeTransfer(transferId: string) {
       return result;
     }
 
-    // Option: if already SUCCESS/PARTIAL, just return its stats
     else if (
       t.status == TransferStatus.PARTIAL || 
       t.status == TransferStatus.FAILED || 

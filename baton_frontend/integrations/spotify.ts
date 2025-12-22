@@ -138,7 +138,6 @@ export const spotifyAdapter: MusicAdapter = {
     async listPlaylists(userId): Promise<Page<Playlist>> {
         const access = await ensureAccessToken(userId, "spotify");
         const res = await fetch(
-            // TODO: check if /me/* works
             `${API}/me/playlists`, { 
                 headers: { Authorization: `Bearer ${access}`},
                 cache: "no-store" 

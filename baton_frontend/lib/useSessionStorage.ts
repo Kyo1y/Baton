@@ -4,7 +4,6 @@ import { useEffect, useState, useCallback } from "react";
 type Stored<T> = { v: T; exp?: number }; // v=value, exp=epoch ms when it expires
 
 export function useSessionStorage<T>(key: string, initial: T, ttlMs: number,) {
-    // read once
     const read = useCallback((): T => {
         if (typeof window === "undefined") return initial;
         try {
@@ -13,12 +12,11 @@ export function useSessionStorage<T>(key: string, initial: T, ttlMs: number,) {
             const parsed = JSON.parse(raw) as Stored<T>;
             if (parsed && typeof parsed === "object") {
                 if (parsed.exp && Date.now() > parsed.exp) {
-                    sessionStorage.removeItem(key); // expired
+                    sessionStorage.removeItem(key);
                     return initial;
                 }
                 return parsed.v as T;
             }
-            // legacy plain value
             return JSON.parse(raw) as T;
         } 
         catch {
@@ -28,7 +26,6 @@ export function useSessionStorage<T>(key: string, initial: T, ttlMs: number,) {
 
     const [value, setValue] = useState<T>(read);
 
-    // write on change
     useEffect(() => {
         if (typeof window === "undefined") return;
 
@@ -40,13 +37,11 @@ export function useSessionStorage<T>(key: string, initial: T, ttlMs: number,) {
         sessionStorage.setItem(key, JSON.stringify(payload));
     }, [key, value, ttlMs]);
 
-    // manual remove
     const remove = useCallback(() => {
         if (typeof window !== "undefined") sessionStorage.removeItem(key);
         setValue(initial);
     }, [key, initial]);
 
-    // optional: set with a custom ttl for this write
     const setWithTTL = useCallback(
         (next: T, ttl: number) => {
         setValue(next);

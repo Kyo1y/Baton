@@ -44,7 +44,6 @@ export async function runTransfer(params: TransferId): Promise<RunTransferResult
         if (destDraft.name == null || destDraft.isPublic == null) {
             throw new Error("Missing draft name/privacy status to create destination playlist.");
         }
-        console.log("PUBLIC PARAM @ RUNTRANSFER",destDraft.isPublic);
         const newPlaylistId = await destAdapter.createPlaylist(userId, destDraft.name, destDraft.isPublic);
         const addingRes = await destAdapter.addTracks(userId, newPlaylistId, srcTracks, true);
         const failed = addingRes[0];
@@ -70,7 +69,6 @@ export async function runTransfer(params: TransferId): Promise<RunTransferResult
             },
         });
 
-        console.log("RUN TRANSFER RES LINE 69",result);
         return result;
     }
     else {
@@ -99,7 +97,6 @@ export async function runTransfer(params: TransferId): Promise<RunTransferResult
             },
         });
         
-        console.log("RUN TRANSFER RES LINE 96", result);
         return result;
     }
 }

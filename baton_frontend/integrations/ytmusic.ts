@@ -2,7 +2,6 @@ import ensureAccessToken from "@/lib/ensureAccessToken";
 import { MusicAdapter, Playlist, Track, Page } from "./types";
 import { prisma } from "@/lib/prisma";
 import makeAltKey from "@/lib/hashKey";
-import normalizeGPT from "@/lib/openai";
 
 const API = "https://www.googleapis.com/youtube/v3";
 
@@ -16,8 +15,8 @@ function normalizeTitle(title: string): string {
 }
 
 function normalizeArtist(artist: string): string {
-    let s = (artist ?? "").normalize("NFKC");                 // unify unicode forms
-    s = s.replace(/[\u200B-\u200D\uFEFF]/g, "");           // zero-width chars
+    let s = (artist ?? "").normalize("NFKC");
+    s = s.replace(/[\u200B-\u200D\uFEFF]/g, "");
     s = s.trim();
 
     // 1) Auto-generated Topic channels: "<Artist> - Topic"
