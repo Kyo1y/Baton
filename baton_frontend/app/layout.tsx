@@ -30,7 +30,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <Footer links={links}/>
             </div>
           
-        </TransitionProvider>
+          </TransitionProvider>
         </ThemeProvider>
 
       </body>

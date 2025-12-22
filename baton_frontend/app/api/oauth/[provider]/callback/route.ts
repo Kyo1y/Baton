@@ -54,7 +54,7 @@ export async function GET(request: Request, { params }: {params: Promise<{ provi
         signin.searchParams.set("callbackUrl", returnTo);
         return NextResponse.redirect(signin);
     }
-    const userId = (session.user as any).id as string;
+    const userId = session.user.id;
 
     const clientId = cfg.clientId;
     const redirectUri = `${url.origin}/api/oauth/${provider}/callback`;

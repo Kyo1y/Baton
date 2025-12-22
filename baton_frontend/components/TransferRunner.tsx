@@ -4,9 +4,9 @@ import { finalizeTransfer } from "@/app/(actions)/finalizeTransfer";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 
-type Props = { transferDraftId: string; source: string; dest: string; userId: string };
+type Props = { transferDraftId: string;  dest: string; userId: string };
 
-export default function TransferRunner({ transferDraftId, source, dest, userId }: Props) {
+export default function TransferRunner({ transferDraftId, dest, userId }: Props) {
   const router = useRouter();
   const [status, setStatus] = useState<"running"|"success"|"partial"|"failed">("running");
   const [error, setError] = useState<string | null>(null);
@@ -27,9 +27,14 @@ export default function TransferRunner({ transferDraftId, source, dest, userId }
         setStatus(res.failed ? "partial" : "success");
         sessionStorage.removeItem(`draft:${userId}:${dest}`);
       }
-      catch (e: any) {
+      catch (e: unknown) {
         if (cancelled) return;
-        setError(e?.message ?? "Transfer failed.");
+        if (e instanceof Error) {
+          setError(e.message);
+        }
+        else {
+          setError("Transfer failed.");
+        }
         setStatus("failed");
         sessionStorage.removeItem(`draft:${userId}:${dest}`);
       }

@@ -1,7 +1,6 @@
 "use client"
 
 import { STRENGTH_BLOCKS } from "@/app/content/strengths";
-import VantaBirdsBackground from "./vantaEffects/VantaBirds";
 
 export default function WhyBaton() {
     return (

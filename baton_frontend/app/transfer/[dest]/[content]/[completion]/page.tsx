@@ -28,7 +28,7 @@ export default async function TransferContent( {params}: { params: Promise<{ des
         <div className="mx-auto max-w-md p-6 text-center">
             <h2 className="text-lg font-semibold">Uh-oh, something went wrong...</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-            We couldn't find a transfer to complete.
+            We couldn&apos;t find a transfer to complete.
             </p>
             <a className="mt-4 inline-block underline" href={`/transfer/${dest}/${content}`}>
             Go back
@@ -39,6 +39,6 @@ export default async function TransferContent( {params}: { params: Promise<{ des
     
 
     return (
-        <TransferRunner transferDraftId={newTransfer.id} source={dest} dest={content} userId={userId} />
+        <TransferRunner transferDraftId={newTransfer.id} dest={content} userId={userId} />
     )
 }

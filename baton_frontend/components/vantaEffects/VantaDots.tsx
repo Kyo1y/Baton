@@ -2,25 +2,22 @@
 
 import React, { useState, useEffect, useRef, PropsWithChildren } from "react";
 import * as THREE from "three";
-import DOTS from "vanta/dist/vanta.dots.min";
-import { usePathname } from "next/navigation";
+import { VantaEffect } from "vanta/dist/vanta.dots.min";
 
 
 export default function VantaDotsBackground({ children }: PropsWithChildren) {
-    const [vantaEffect, setVantaEffect] = useState<any>(null);
+    const [vantaEffect, setVantaEffect] = useState<VantaEffect | null>(null);
     const vantaRef = useRef<HTMLDivElement | null>(null);
-    const pathname = usePathname();
-    const hideVanta = pathname.startsWith("/transfer") || pathname.startsWith("/dashboard");
 
   useEffect(() => {
     if (vantaEffect || !vantaRef.current) return;
 
     // 1) Expose THREE globally for the DOTS effect
-    (window as any).THREE = THREE;
+    window.THREE = THREE;
 
     // 2) Import the effect after THREE is on window
     import("vanta/dist/vanta.dots.min").then((mod) => {
-      const DOTS = (mod as any).default ?? mod;
+      const DOTS = mod.default ?? mod;
       const effect = DOTS({
         el: vantaRef.current!,
         THREE,
@@ -35,7 +32,7 @@ export default function VantaDotsBackground({ children }: PropsWithChildren) {
       setVantaEffect(effect);
     });
     return () => {
-      vantaEffect?.destroy?.();
+      vantaEffect!.destroy?.();
     };
   }, [vantaEffect]);
 

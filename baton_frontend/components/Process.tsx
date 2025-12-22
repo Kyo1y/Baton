@@ -1,7 +1,6 @@
 "use client"
 
-import { STEP_BLOCKS } from "@/app/content/processSteps"
-import VantaBirdsBackground from "./vantaEffects/VantaBirds"
+import { STEP_BLOCKS } from "@/app/content/processSteps";
 
 export default function Process() {
     return (

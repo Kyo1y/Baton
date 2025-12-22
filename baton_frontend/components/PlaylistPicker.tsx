@@ -29,12 +29,6 @@ export default function PlaylistPicker( { source, dest, userId, sourcePlaylists,
         () => (draftDest ? [...destPlaylists, draftDest] : destPlaylists),
         [draftDest, destPlaylists]
     )
-    useEffect(() => {
-        console.log("DRAFT",draftDest)
-        console.log(selectedDestId)
-        console.log(selectedSourceId)
-    }, [draftDest, selectedDestId, selectedSourceId]
-    )
 
     function addDraftPlaylist(name: string, isPublic: boolean, url: string) {
         setDraftDest({
@@ -42,7 +36,7 @@ export default function PlaylistPicker( { source, dest, userId, sourcePlaylists,
             name,
             thumbnail: { url, width:30, height:30 },
             isPublic,
-        } as any);
+        } as Playlist);
         setSelectedDestId("__draft__");
     }
     async function onTransfer() {
@@ -74,7 +68,7 @@ export default function PlaylistPicker( { source, dest, userId, sourcePlaylists,
                             Choose the source and destination playlists.
                         </h1>
                         <p className="text-center text-balance max-w-prose text-base text-md sm:text-lg text-muted-foreground">
-                            You may also create a new playlist in the destination provider if you don't see the one you want.
+                            You may also create a new playlist in the destination provider if you don&apos;t see the one you want.
                         </p>
                     </div>
                     <div className="grid grid-cols-[auto_5rem_auto]">

@@ -6,7 +6,7 @@ export const runtime = "nodejs";
 
 export default async function requireIntegration (
     userId: string, provider: string, returnTo: string
-): Promise<any> {
+): Promise<string | void> {
     
     const token = await prisma.integrationToken.findUnique({
         where: { userId_provider: { userId, provider } },

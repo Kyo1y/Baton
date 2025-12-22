@@ -8,16 +8,10 @@ import WhyBaton from "@/components/WhyBaton";
 export default async function Home() {
   return (
     <>  
-      {/* <div
-      className="z-2"
-      > */}
         <HomeIntro />
         <WhyBaton />
         <Process />
         <Prompt />
-      {/* </div> */}
-        
-      
     </>
   );
 }

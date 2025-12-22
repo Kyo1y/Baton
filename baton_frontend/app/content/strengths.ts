@@ -1,10 +1,11 @@
 import { Shuffle, Zap, Shield } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 export type Feature = {
   key: string;
   title: string;
   description: string;
-  icon: any;
+  icon: LucideIcon;
 };
 
 export const STRENGTH_BLOCKS: readonly Feature[] = [
