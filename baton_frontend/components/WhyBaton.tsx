@@ -46,8 +46,8 @@ export default function WhyBaton() {
                     return (
                         <div
                         key={key}
-                        className="p-4 rounded-md border-1 sm:border-white sm:hover:border-[#F8831E] grid 
-
+                        className="p-4 rounded-md border-1 sm:border-[#F8831E] sm:hover:border-[#F8831E] grid 
+                        bg-white dark:bg-black z-5
                         grid-rows-[2.5rem_auto_auto]
                         sm:grid-rows-[3rem_auto_auto] gap-2 flex-1"
                         
