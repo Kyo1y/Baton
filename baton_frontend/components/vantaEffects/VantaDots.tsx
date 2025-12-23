@@ -6,7 +6,7 @@ import { VantaEffect } from "vanta/dist/vanta.dots.min";
 
 
 export default function VantaDotsBackground({ children }: PropsWithChildren) {
-    const [vantaEffect, setVantaEffect] = useState<VantaEffect | null>(null);
+    const [vantaEffect, setVantaEffect] = useState<any>(null);
     const vantaRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -32,7 +32,7 @@ export default function VantaDotsBackground({ children }: PropsWithChildren) {
       setVantaEffect(effect);
     });
     return () => {
-      vantaEffect!.destroy?.();
+      vantaEffect?.destroy?.();
     };
   }, [vantaEffect]);
 
