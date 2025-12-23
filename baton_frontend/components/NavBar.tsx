@@ -14,6 +14,8 @@ import { loginGoogle } from "@/lib/auth-client";
 import { usePageTransition } from "./TransitionProvider";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import Image from "next/image";
+import googlelogo from "@/public/logos/google-logo.svg"
 
 export function ThemeToggle() {
   const { theme, setTheme, systemTheme } = useTheme();
@@ -149,12 +151,19 @@ export default function NavBar({links}: {links: NavLink[]}) {
                 .map(l => l.label == "Sign in" ? (
                   <button
                   key="signin"
-                  className="border-1 rounded-md py-1 ml-3 flex px-3 text-black w-[90%] justify-center "
+                  className="border-1 rounded-md py-1 ml-3 flex px-3 text-black w-[90%] justify-center dark:text-white"
                   onClick={(e) => {
                     e.preventDefault();
                     void loginGoogle();
                   }}>
-                    Google
+                    <Image 
+                    src={googlelogo}
+                    height={25}
+                    width={25}
+                    alt={"google logo"}
+                    className="mx-1"
+                    />
+                    Sign in
                   </button>
                 ) : (
                     <Link 
@@ -173,7 +182,7 @@ export default function NavBar({links}: {links: NavLink[]}) {
                   ))
                 }
                 <div
-                className="flex justify-center"
+                className="flex justify-center my-2"
                 >
                 <ThemeToggle />
 
