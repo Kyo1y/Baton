@@ -2,7 +2,7 @@
 
 import { runTransfer } from "@/lib/transfer/runTransfer";
 import { prisma } from "@/lib/prisma";
-import { TransferStatus } from "@prisma/client";
+import { TransferStatus } from "../../../node_modules/.prisma/client/index";
 
 
 export async function finalizeTransfer(transferId: string) {
