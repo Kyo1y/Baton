@@ -134,7 +134,7 @@ export const ytmusicAdapter: MusicAdapter = {
     async listPlaylists(userId: string): Promise<Page<Playlist>> {
         const access = await ensureAccessToken(userId, "ytmusic");
         const res = await fetch(
-            `${API}/playlists?part=snippet&mine=true&maxResults=50`, {
+            `${API}/playlists?part=snippet,status&mine=true&maxResults=50`, {
                 headers: {Authorization: `Bearer ${access}`},
                 cache: "no-store" 
             }
