@@ -39,7 +39,9 @@ export default function PlaylistsGrid({
                             <Button  onClick={() => onChange(isServiceSelected ? null : p.id )} 
                             className= {clsx(
                                 `rounded-none cursor-pointer border-l-1 border-b-1 border-r-1 border-black border-solid rounded-b-lg bg-transparent shadow-none
-                            hover:bg-[#F3F3F3] w-full md:max-w-[13rem]`,
+                            hover:bg-[#F3F3F3] w-full md:max-w-[13rem]
+                            z-5 dark:text-white dark:bg-black
+                            `,
                             isServiceSelected ? "bg-[#F8831E] hover:bg-[#F8831E] text-white" : "bg-transparent"
                             )} >
                                 <div className="flex items-center w-full">
@@ -69,7 +71,9 @@ export default function PlaylistsGrid({
                     className= {clsx(
                         `rounded-none cursor-pointer first:rounded-t-lg 
                     last:rounded-b-lg bg-transparent shadow-none border-l-1 border-r-1 border-b-1 border-black border-solid first:border-t-1
-                    hover:bg-[#F3F3F3] w-full md:max-w-[13rem] md:min-w-[13rem] `,
+                    hover:bg-[#F3F3F3] w-full md:max-w-[13rem] md:min-w-[13rem] 
+                    z-5 dark:text-white dark:bg-black
+                    `,
                     isServiceSelected ? "bg-[#F8831E] hover:bg-[#F8831E] text-white" : "bg-transparent"
                     )} >
                         <div className="flex items-center w-full">

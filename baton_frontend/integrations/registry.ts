@@ -1,10 +1,10 @@
-import { MusicAdapter } from "./types";
+import { MusicAdapter, Registry } from "./types";
+import { Provider } from "@prisma/client";
 import { spotifyAdapter } from "./spotify";
 import { ytmusicAdapter } from "./ytmusic";
 
-export type Provider = "spotify" | "ytmusic";
 
-export const REGISTRY: Record<Provider, { name: string; adapter: MusicAdapter }> = {
+export const REGISTRY: Registry = {
   spotify: { name: "Spotify", adapter: spotifyAdapter },
   ytmusic: { name: "YouTube Music", adapter: ytmusicAdapter },
 };
@@ -20,7 +20,6 @@ export function requireProvider(x: string): Provider {
   return x;
 }
 
-export function getAdapter(p: string | Provider): MusicAdapter {
-  const key = typeof p === "string" ? requireProvider(p) : p;
-  return REGISTRY[key].adapter;
+export function getAdapter<P extends Provider>(p: P): MusicAdapter<P> {
+  return REGISTRY[p].adapter;
 }

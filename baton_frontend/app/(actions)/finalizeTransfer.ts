@@ -1,6 +1,6 @@
 "use server";
 
-import { runTransfer } from "@/lib/transfer/runTransfer";
+import { runTransfer } from "@/lib/transfers/runTransfer";
 import { prisma } from "@/lib/prisma";
 
 export async function finalizeTransfer(transferId: string) {

@@ -1,10 +1,10 @@
-import { prisma } from "@/lib/prisma";
+import "server-only";
+import { awsGet } from "../aws/awsDb";
 
 export const getAuthMethod = async(userId: string): Promise<string> => {
-    const authMethod = await prisma.account.findFirst({
-        where: { userId: userId},
-        select: { provider: true}
-    })
-    return authMethod!.provider;
-
+    const authMethod = await awsGet<{ authProvider: string }>(
+        "/auth/provider",
+        { userId }
+    )
+    return authMethod.authProvider;
 }

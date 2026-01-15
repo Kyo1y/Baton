@@ -1,6 +1,7 @@
 "use server";
+import { createTransfer } from "@/lib/transfers/awsTransfers";
 
-import { prisma } from "@/lib/prisma";
+
 export async function saveTransferDraft(params: {
   userId: string,
   source: string,
@@ -13,12 +14,18 @@ export async function saveTransferDraft(params: {
 }) {
     const { userId, source, dest, srcPlaylistId, destPlaylistId, srcPlaylistName, destDraft, destPlaylistName } = params;
 
-    const newTransfer = await prisma.transferDraft.create({
-        data: { 
-          userId, source, dest, srcPlaylistId, destPlaylistId, srcPlaylistName, destDraftName: destDraft?.name, destDraftIsPublic: destDraft?.isPublic, destPlaylistName,
-        },
-        select: { id: true }
-    });
-
-    return newTransfer;
+    if (destDraft) {
+      const newTransfer = await createTransfer(userId, source, dest, srcPlaylistId, destPlaylistId, srcPlaylistName, destPlaylistName, destDraft.name, destDraft.isPublic,)
+      if (!newTransfer) {
+        throw new Error("Could not save transfer info")
+      }
+      return newTransfer.id;
+    }
+    else {
+      const newTransfer = await createTransfer(userId, source, dest, srcPlaylistId, destPlaylistId, srcPlaylistName, destPlaylistName)
+      if (!newTransfer) {
+        throw new Error("Could not save transfer info")
+      }
+      return newTransfer.id;
+    }
 }

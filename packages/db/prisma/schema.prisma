@@ -10,7 +10,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = env("LOCAL_DB_URL")
 }
 
 model User {
@@ -115,11 +115,16 @@ enum TransferStatus {
   CANCELED
 }
 
+enum Provider {
+  spotify
+  ytmusic
+}
+
 model TransferDraft {
   id                String   @id @default(cuid())
   userId            String   
-  source            String
-  dest              String
+  source            Provider
+  dest              Provider
   srcPlaylistId     String
   destPlaylistId    String
   srcPlaylistName   String

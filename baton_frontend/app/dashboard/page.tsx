@@ -17,8 +17,8 @@ export default async function DashboardPage() {
 
     const connections = await getConnections(userId);
 
-    const { items, nextCursor } = await listTransfers(userId);
+    const { items, nextCursorCreatedAt } = await listTransfers(userId);
     return (
-        <Dashboard services={connections} transfers={items} initialCursor={nextCursor} userId={userId} disconnectService={disconnectService}/>
+        <Dashboard services={connections} transfers={items} initialCursor={nextCursorCreatedAt} userId={userId} disconnectService={disconnectService}/>
     )
 }

@@ -11,15 +11,13 @@ import { useState } from "react";
 import loadTransfers from "@/app/(actions)/dashboard/loadTransfers";
 
 
-
-
 type Props = {
     services: {
         id: string;
         userId: string;
         image: string | null;
         provider: string;
-        createdAt: Date;
+        createdAt: string;
         username: string;
     }[],
     transfers: {
@@ -31,7 +29,7 @@ type Props = {
         srcPlaylistName: string;
         destPlaylistName: string | null;
     }[],
-    initialCursor: { id: string } | null;
+    initialCursor: string | null;
     userId: string,
     disconnectService: (id: string, userId: string, provider: string) => Promise<void>,
 }
@@ -136,7 +134,7 @@ export default function Dashboard({ services, transfers, initialCursor, userId, 
         try {
             const res = await loadTransfers({ userId, cursor, });
             setItems(prev => [...prev, ...res.items])
-            setCursor(res.nextCursor);
+            setCursor(res.nextCursorCreatedAt);
         } finally {
             setLoading(false);
         }
@@ -145,8 +143,8 @@ export default function Dashboard({ services, transfers, initialCursor, userId, 
         if (items.length <= 10 || loading) return;
         setLoading(true);
         const sliceRange = items.length % 10 == 0 ? items.length - 10 : items.length - (items.length % 10);
-        const newCursor = items.length % 10 == 0 ? items[items.length - 11] : items[items.length - (items.length % 10)];
-
+        const newCursorDate = items.length % 10 == 0 ? items[items.length - 11].createdAt : items[items.length - (items.length % 10)].createdAt;
+        const newCursor = formatDate(newCursorDate);
         const shortenedItems = items.slice(0, sliceRange);
         setItems(shortenedItems);
         setCursor(newCursor);

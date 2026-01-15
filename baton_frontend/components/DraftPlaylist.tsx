@@ -70,7 +70,7 @@ export function DraftPlaylist({
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogTrigger asChild>
-          <Button variant="outline" className="text-[#F8831E] w-[90%] mx-auto cursor-pointer hover:text-[#F8831E]">+</Button>
+          <Button variant="outline" className="text-[#F8831E] w-[90%] mx-auto cursor-pointer hover:text-[#F8831E] z-5">+</Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>

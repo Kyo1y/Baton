@@ -1,7 +1,8 @@
 import { unstable_cache } from "next/cache";
 import { getAdapter } from "@/integrations/registry";
+import type { Provider } from "@prisma/client";
 
-export async function listPlaylistsCached(userId: string, provider: string) {
+export async function listPlaylistsCached(userId: string, provider: Provider) {
     const key = ["playlists", userId, provider]
 
     const getCachedPlaylists = unstable_cache(

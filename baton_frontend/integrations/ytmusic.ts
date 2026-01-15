@@ -1,6 +1,6 @@
 import ensureAccessToken from "@/lib/ensureAccessToken";
-import { MusicAdapter, Playlist, Track, Page } from "./types";
-import { prisma } from "@/lib/prisma";
+import { MusicAdapter, Playlist, Track, Page, TrackWithProviderId } from "./types";
+import { ytmusicLookup, ytmusicPair, ytmusicUpsertEID } from "@/lib/ytmusic/awsYtmusic";
 import makeAltKey from "@/lib/hashKey";
 
 const API = "https://www.googleapis.com/youtube/v3";
@@ -34,34 +34,9 @@ function normalizeArtist(artist: string): string {
 }
 
 async function findRow(isrcParam: string | null, altKeyParam: string) {
-    if (isrcParam) {
-        const row = await prisma.canonicalTrack.findUnique({
-        where: { isrc: isrcParam },
-        select: {
-            id: true,
-            externalIds: {
-                    where: {provider: "ytmusic"},
-                    select: {externalId: true}
-                }
-            }
-        })
-        if (row) {
-            return row;
-        }
-        if (!row && altKeyParam !== "") {
-            const row = await prisma.canonicalTrack.findUnique({
-            where: { altKey: altKeyParam },
-            select: {
-                id: true,
-                externalIds: {
-                        where: {provider: "ytmusic"},
-                        select: {externalId: true}
-                    }
-                }
-            });
-            return row;
-        }
-    }
+    const resp = await ytmusicLookup(altKeyParam, isrcParam);
+
+    return resp;
 }
 
 function itemizeTracks(tracks: any): Track[] {
@@ -75,62 +50,26 @@ function itemizeTracks(tracks: any): Track[] {
 
 async function addIdToRow(t: Track, access: string, rowId: string): Promise<string> {
     const track = await ytmusicAdapter.fetchTrack(t, access);
-    const id = track.ytmusicId;
-    await prisma.trackExternalId.upsert({
-        where: { canonicalId_provider: {canonicalId: rowId, provider: "ytmusic"} },
-        update: { externalId: id },
-        create: { canonicalId: rowId, provider: "ytmusic", externalId: id }
-    })
-    const isrcExists = await prisma.canonicalTrack.findFirst({
-        where: { id: rowId },
-        select: { isrc: true }
-    })
-    if (!isrcExists || !isrcExists.isrc) {
-        await prisma.canonicalTrack.updateMany({
-            where: { id: rowId, isrc: null},
-            data: { isrc: track?.isrc},
-        })
+    if (track == false) {
+        return "404";
     }
+    const id = track.ytmusicId;
+    await ytmusicUpsertEID(id, rowId, track.isrc);
     return id;
 }
 
-async function createPair(t: Track, access: string, altKeyParam: string): Promise<string> {
-    const data = {
-        title: t.title,
-        artists: t.artists,
-        durationMs: 0,
-        isrc: t.isrc,
-        altKey: altKeyParam,
-    }
-
-    const canonical = await prisma.canonicalTrack.upsert({
-        where: t.isrc ? { isrc: t.isrc } : { altKey: altKeyParam },
-        create: data,
-        update: {
-            title: data.title,
-            artists: data.artists,
-            durationMs: data.durationMs,
-        },
-        select: { id: true }
-    })
-
+async function createPair(t: Track, access: string, altKeyParam: string, isrcParam?: string): Promise<string> {
     const track = await ytmusicAdapter.fetchTrack(t, access);
-    const externalid = await prisma.trackExternalId.upsert({
-        where: { canonicalId_provider: { canonicalId: canonical.id, provider: "ytmusic" }},
-        create: {
-            canonicalId: canonical.id,
-            provider: "ytmusic",
-            externalId: track.ytmusicId,
-        },
-        update: {
-            externalId: track.ytmusicIid
-        },
-        select: {externalId: true}
-    })
-    return externalid.externalId;
+    if (track == false) {
+        return "404";
+    }
+    
+    const resp = await ytmusicPair(track, altKeyParam, isrcParam);
+
+    return resp.ytmusicExternalId;
 }
 
-export const ytmusicAdapter: MusicAdapter = {
+export const ytmusicAdapter: MusicAdapter<"ytmusic"> = {
     async listPlaylists(userId: string): Promise<Page<Playlist>> {
         const access = await ensureAccessToken(userId, "ytmusic");
         const res = await fetch(
@@ -274,19 +213,19 @@ export const ytmusicAdapter: MusicAdapter = {
                 const row = await findRow(t.isrc, altKey);
                 // check if row exists for current ISRC
                 if (row) {
-                    const ytmusicId = row.externalIds[0]?.externalId ?? null;
+                    const ytmusicId = row.ytmusicExternalId ?? null;
                     // check if ytmusic ID for that ISRC exists in that row
                     if (ytmusicId) {
                         id = ytmusicId;
                     }
                     // if not, fetch ytmusic ID by that ISRC and add it to the row
                     else {
-                        id = await addIdToRow(t, access, row.id);
+                        id = await addIdToRow(t, access, row.canonicalId);
                     }
                 } 
                 // if row does not exist, create canonical track for that ISRC
                 else {
-                    id = await createPair(t, access, altKey);
+                    id = await createPair(t, access, altKey, t.isrc)
                 }
             }
             // if not, lookup by altKey (hash of title+artist+duration)
@@ -295,14 +234,14 @@ export const ytmusicAdapter: MusicAdapter = {
                 const row = await findRow(null, altKey);
                 // check if row by altKey exists
                 if (row) {
-                    const ytmusicId = row.externalIds[0]?.externalId ?? null;
+                    const ytmusicId = row.ytmusicExternalId?? null;
                     // check if ytmusic ID associated with that row exists
                     if (ytmusicId) {
                         id = ytmusicId;
                     } 
                     // if not, fetch ytmusic ID by search and add it to the row
                     else {
-                        id = await addIdToRow(t, access, row.id);
+                        id = await addIdToRow(t, access, row.canonicalId);
                     }
                 }
                 // if not, create canonicalTrack with that altKey
@@ -336,6 +275,7 @@ export const ytmusicAdapter: MusicAdapter = {
             if (!res.ok) {
                 failed.push({
                     title: t.title, 
+                    isrc: null,
                     artists: t.artists, 
                     durationMs: 0,
                     pairs: [],
@@ -344,7 +284,7 @@ export const ytmusicAdapter: MusicAdapter = {
         }
         return [failed, copies];
     },
-    async fetchTrack(t: Track, access: string): Promise<any> {
+    async fetchTrack(t: Track, access: string): Promise<false | TrackWithProviderId<"ytmusic">> {
         const url = new URL(`${API}/search`);
         url.search = new URLSearchParams({
             part: "snippet",
@@ -373,7 +313,8 @@ export const ytmusicAdapter: MusicAdapter = {
             artists: [artist],
             isrc: null,
             durationMs: 0,
-            ytmusicId: id
+            pairs: [{ provider: "ytmusic", id: id}],
+            ytmusicId: id,
         }
     },
 }

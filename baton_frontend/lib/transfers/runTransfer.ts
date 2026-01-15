@@ -1,10 +1,11 @@
 import { getAdapter } from "@/integrations/registry";
-import { prisma } from "@/lib/prisma";
+import  { Provider } from "@prisma/client";
+import { findTransferById, updateTransfer } from "./awsTransfers";
 
 export type RunTransferInput = {
   userId: string;
-  source: string;
-  dest: string;
+  source: Provider;
+  dest: Provider;
   srcPlaylistId: string;
   destPlaylistId: string;
   srcPlaylistName: string;
@@ -17,8 +18,8 @@ export type TransferId = {
 };
 
 export type RunTransferResult = {
-    source: string;
-    dest: string;
+    source: Provider;
+    dest: Provider;
     destPlaylistName: string;
     srcPlaylistName: string;
     added: number;
@@ -26,11 +27,15 @@ export type RunTransferResult = {
     copies: number;
 };
 
+
 export async function runTransfer(params: TransferId): Promise<RunTransferResult> {
     const { id } = params;
-    const transfer = await prisma.transferDraft.findUnique({
-        where: { id }
-    })
+    const res = await findTransferById(id);
+    if (!res) {
+        throw new Error("Transfer could not be found");
+    }
+
+    const transfer = res.row;
     if (!transfer) throw new Error("Transfer data was lost. Please try again.");
     const [userId, srcPlaylistId, destPlaylistId, destDraft, srcPlaylistName, destPlaylistName, source, dest] = [
         transfer.userId, transfer.srcPlaylistId, transfer.destPlaylistId, { name: transfer.destDraftName, isPublic: transfer.destDraftIsPublic }, 
@@ -50,6 +55,7 @@ export async function runTransfer(params: TransferId): Promise<RunTransferResult
         const copies = addingRes[1];
         const addedCounted = srcTracks.length - failed.length;
         const failedCounted = failed.length;
+        const status = failedCounted > 0 ? "PARTIAL" : "SUCCESS";
         const result = {
             source,
             dest,
@@ -60,14 +66,11 @@ export async function runTransfer(params: TransferId): Promise<RunTransferResult
             copies: copies,
         }
         
-        await prisma.transferDraft.update({
-            where: { id },
-            data: {
-                status: failedCounted > 0 ? "PARTIAL" : "SUCCESS",
-                added: addedCounted,
-                failed: failedCounted,
-            },
-        });
+        const res = await updateTransfer(id, status, addedCounted, failedCounted, copies);
+
+        if(!res) {
+            throw new Error("Could not update transfer draft")
+        }
 
         return result;
     }
@@ -77,6 +80,7 @@ export async function runTransfer(params: TransferId): Promise<RunTransferResult
         const copies = addingRes[1];
         const addedCounted = srcTracks.length - failed.length - copies;
         const failedCounted = failed.length;
+        const status = failedCounted > 0 ? "PARTIAL" : "SUCCESS";
         const result = {
             source,
             dest,
@@ -86,16 +90,12 @@ export async function runTransfer(params: TransferId): Promise<RunTransferResult
             failed: failedCounted,
             copies: copies,
         }
+        
+        const res = await updateTransfer(id, status, addedCounted, failedCounted, copies);
 
-        await prisma.transferDraft.update({
-            where: { id },
-            data: {
-                status: failedCounted > 0 ? "PARTIAL" : "SUCCESS",
-                added: addedCounted,
-                failed: failedCounted,
-                copies: copies,
-            },
-        });
+        if(!res) {
+            throw new Error("Could not update transfer draft")
+        }
         
         return result;
     }

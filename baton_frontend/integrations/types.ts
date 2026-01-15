@@ -1,3 +1,6 @@
+import type { TransferDraft } from "@prisma/client";
+import { Provider } from "@prisma/client";
+
 export type Playlist = { 
     id: string, 
     name: string, 
@@ -14,19 +17,27 @@ type IdProviderPair = {
 export type Track = { 
     title: string, 
     artists: string[],
-    isrc?: string,
+    isrc: string | null,
     durationMs: number,
     pairs: IdProviderPair[],
 }
 
 export type Page<T> = { items: T[], cursor?: string | null } 
 
-export interface MusicAdapter {
+export type Registry = {
+  [P in Provider]: { name: string; adapter: MusicAdapter<P> };
+};
+
+export interface MusicAdapter<P extends Provider> {
     listPlaylists(userId: string): Promise<Page<Playlist>>;
     listPlaylistTracks(userId: string, playlistId: string, cursor?: string | null): Promise<Page<Track>>;
     listAllPlaylistTracks(userId: string, playlistId: string, startCursor?: string, ): Promise<Track[]>;
     createPlaylist(userId: string, name: string, publicParam: boolean): Promise<string>;
     addTracks(userId: string, playlistId: string, tracks: Track[], isNewPlaylist: boolean): Promise<[Track[], number]>;
-    fetchTrack(t: Track, access: string): Promise<any>;
+    fetchTrack(t: Track, access: string): Promise<TrackWithProviderId<P> | false>;
     trackAlreadyExists(targetTrackId: string, targetPlaylist: Track[]): Promise<boolean>;
 }
+
+export type TrackWithProviderId<P extends Provider> = Track & { [K in `${P}Id`]: string }
+
+export type TransferHistoryPage = { items: TransferDraft[], nextCursorCreatedAt: string, hasMore: boolean }

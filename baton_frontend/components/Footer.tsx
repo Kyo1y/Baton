@@ -64,7 +64,7 @@ export default function Footer({ links }: {links: NavLink[]}) {
               <Link href="https://github.com/Kyo1y/Baton" aria-label="GitHub">
                 <Github className="h-5 w-5 text-white" />
               </Link>
-              <Link href="https:/linkedin.com/in/kyoly" aria-label="Linkedin">
+              <Link href="https://www.linkedin.com/in/kyoly" aria-label="Linkedin">
                 <Linkedin className="h-5 w-5 text-white" />
               </Link>
               <Link href="mailto:sadyrbekov.kairat@gmail.com" aria-label="Email">

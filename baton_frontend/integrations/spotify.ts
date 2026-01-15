@@ -1,40 +1,16 @@
 import ensureAccessToken from "@/lib/ensureAccessToken";
 import { MusicAdapter, Playlist, Track, Page } from "./types";
-import { prisma } from "@/lib/prisma";
+import { spotifyLookup, spotifyPair, spotifyUpsertEID, getSpotifyUserId } from "@/lib/spotify/awsSpotify";
+import type { TrackWithProviderId } from "./types";
 import makeAltKey from "@/lib/hashKey";
 import normalizeGPT from "@/lib/openai";
 
 const API = "https://api.spotify.com/v1";
 
 async function findRow(isrcParam: string | null, altKeyParam: string) {
-    if (isrcParam) {
-        const row = await prisma.canonicalTrack.findUnique({
-        where: { isrc: isrcParam },
-        select: {
-            id: true,
-            externalIds: {
-                    where: {provider: "spotify"},
-                    select: {externalId: true}
-                }
-            }
-        })
-        if (row) {
-            return row;
-        }
-        if (!row && altKeyParam !== "") {
-            const row = await prisma.canonicalTrack.findUnique({
-            where: { altKey: altKeyParam },
-            select: {
-                id: true,
-                externalIds: {
-                        where: {provider: "spotify"},
-                        select: {externalId: true}
-                    }
-                }
-            });
-            return row;
-        }
-    }
+    const resp = await spotifyLookup(altKeyParam, isrcParam);
+
+    return resp;
 }
 
 async function addIdToRow(t: Track, access: string, rowId: string): Promise<string> {
@@ -43,75 +19,21 @@ async function addIdToRow(t: Track, access: string, rowId: string): Promise<stri
         return "404";
     }
     const id = track.spotifyId;
-    await prisma.trackExternalId.upsert({
-        where: { canonicalId_provider: {canonicalId: rowId, provider: "spotify"} },
-        update: { externalId: id },
-        create: { canonicalId: rowId, provider: "spotify", externalId: id }
-    })
-    const isrcExists = await prisma.canonicalTrack.findFirst({
-        where: { id: rowId },
-        select: { isrc: true }
-    })
-    if (!isrcExists || !isrcExists.isrc) {
-        await prisma.canonicalTrack.updateMany({
-            where: { id: rowId, isrc: null },
-            data: { isrc: track.isrc },
-        })
-    }
+    
+    await spotifyUpsertEID(id, rowId, track.isrc);
+
     return id;
 }
 
-async function createPair(t: Track, access: string, isrcParam?: string, altKeyParam?: string): Promise<string> {
+async function createPair(t: Track, access: string, altKeyParam: string, isrcParam?: string, ): Promise<string> {
     const track = await spotifyAdapter.fetchTrack(t, access);
     if (track == false) {
         return "404";
     }
+    
+    const resp = await spotifyPair(track, altKeyParam, isrcParam);
 
-    const existing = await prisma.trackExternalId.findUnique({
-        where: { provider_externalId: { provider: "spotify", externalId: track.spotifyId } },
-        select: { canonicalId: true },
-    });
-    if (!existing) {
-        const data = {
-            title: t.title,
-            artists: t.artists,
-            durationMs: 0,
-            isrc: isrcParam,
-            altKey: altKeyParam,
-        }
-
-        const canonical = await prisma.canonicalTrack.upsert({
-            where: isrcParam ? { isrc: isrcParam } : { altKey: altKeyParam },
-            create: data,
-            update: {
-                title: data.title,
-                artists: data.artists,
-                durationMs: data.durationMs,
-            },
-            select: { id:true, isrc: true }
-        })
-
-        if (track.isrc && !canonical.isrc) {
-            await prisma.canonicalTrack.update({
-                where: { id: canonical.id },
-                data: { isrc: track.isrc }
-            })
-        }
-        const externalid = await prisma.trackExternalId.upsert({
-            where: { canonicalId_provider: { canonicalId: canonical.id, provider: "spotify" }},
-            create: {
-                canonicalId: canonical.id,
-                provider: "spotify",
-                externalId: track.spotifyId,
-            },
-            update: {
-                externalId: track.spotifyId,
-            },
-            select: {externalId: true}
-        })
-        return externalid.externalId;
-    };
-    return track.spotifyId;   
+    return resp.spotifyExternalId;
 }
 
 function checkDuplicatePlaylistNames(list: Playlist[]) {
@@ -133,7 +55,7 @@ function checkDuplicatePlaylistNames(list: Playlist[]) {
     return duplicateIndices;
 }
 
-export const spotifyAdapter: MusicAdapter = {
+export const spotifyAdapter: MusicAdapter<"spotify"> = {
 
     async listPlaylists(userId): Promise<Page<Playlist>> {
         const access = await ensureAccessToken(userId, "spotify");
@@ -194,7 +116,7 @@ export const spotifyAdapter: MusicAdapter = {
         
         return all;
     },
-    async fetchTrack(t: Track, access: string): Promise<any> {
+    async fetchTrack(t: Track, access: string): Promise<TrackWithProviderId<"spotify"> | false> {
         if (t.isrc) {
             const res = await fetch(
                 `${API}/search?type=track&q=isrc:${t.isrc}`, {
@@ -208,6 +130,7 @@ export const spotifyAdapter: MusicAdapter = {
                 artists: [trackJson.tracks.items[0].artists[0].name],
                 isrc: t.isrc,
                 durationMs: 0,
+                pairs: [{ provider: "spotify", id: trackJson.tracks.items[0].id }],
                 spotifyId: trackJson.tracks.items[0].id,
             }
         }
@@ -229,6 +152,7 @@ export const spotifyAdapter: MusicAdapter = {
                 artists: [trackJson.tracks.items[0].artists[0].name],
                 isrc: trackJson.tracks.items[0].isrc,
                 durationMs: 0,
+                pairs: [{ provider: "spotify", id: trackJson.tracks.items[0].id }],
                 spotifyId: trackJson.tracks.items[0].id,
             }
         }
@@ -267,11 +191,11 @@ export const spotifyAdapter: MusicAdapter = {
 
             // check if Track includes ISRC
             if (t.isrc) {
-                const row = await findRow(t.isrc, altKey);
                 // check if row exists for current ISRC
+                const row = await findRow(t.isrc, altKey);
                 if (row) {
-                    const spotifyId = row.externalIds[0]?.externalId ?? null;
                     // check if spotify ID for that ISRC exists in that row
+                    const spotifyId = row?.spotifyExternalId ?? null;
                     if (spotifyId) {
                         id = spotifyId;
                         if (!isNewPlaylist && targetPlaylist) {
@@ -290,7 +214,7 @@ export const spotifyAdapter: MusicAdapter = {
                     }
                     // if not, fetch spotify ID by that ISRC and add it to the row
                     else {
-                        id = await addIdToRow(t, access, row.id);
+                        id = await addIdToRow(t, access, row.canonicalId);
                         if (id == "404") {
                             failed.push({
                                 title: t.title,
@@ -318,7 +242,7 @@ export const spotifyAdapter: MusicAdapter = {
                 } 
                 // if row does not exist, create canonical track for that ISRC
                 else {
-                    id = await createPair(t, access, t.isrc, altKey);
+                    id = await createPair(t, access, altKey, t.isrc);
                     if (id == "404") {
                         failed.push({
                             title: t.title,
@@ -350,8 +274,8 @@ export const spotifyAdapter: MusicAdapter = {
                 const row = await findRow(null, altKey);
                 // check if row by altKey exists
                 if (row) {
-                    const spotifyId = row.externalIds[0]?.externalId ?? null;
                     // check if spotify ID associated with that row exists
+                    const spotifyId = row.spotifyExternalId ?? null;
                     if (spotifyId) {
                         id = spotifyId;
                         if (!isNewPlaylist && targetPlaylist) {
@@ -370,7 +294,7 @@ export const spotifyAdapter: MusicAdapter = {
                     } 
                     // if not, fetch spotify ID by search(track: artist:) and add it to the row
                     else {
-                        id = await addIdToRow(t, access, row.id);
+                        id = await addIdToRow(t, access, row.canonicalId);
                         if (id == "404") {
                             failed.push({
                                 title: t.title,
@@ -398,7 +322,7 @@ export const spotifyAdapter: MusicAdapter = {
                 }
                 // if not, create canonicalTrack with that altKey
                 else {
-                    id = await createPair(t, access, undefined, altKey);
+                    id = await createPair(t, access, altKey, undefined);
                     if (id == "404") {
                         failed.push({
                             title: t.title,
@@ -447,13 +371,10 @@ export const spotifyAdapter: MusicAdapter = {
     },
     async createPlaylist(userId: string, name: string, publicParam: boolean): Promise<string> {
         const access = await ensureAccessToken(userId, "spotify");
-        const userSpotifyId = await prisma.providerProfile.findUnique({
-            where: { userId_provider: { userId, provider: "spotify" } },
-            select: { providerId: true },
-        })
+        const userSpotifyId = await getSpotifyUserId(userId);
 
         const res = await fetch(
-            `${API}/users/${userSpotifyId?.providerId}/playlists`, {
+            `${API}/users/${userSpotifyId?.spotifyUserId}/playlists`, {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${access}`,

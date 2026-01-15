@@ -3,12 +3,16 @@ import { authOptions } from "@/auth";
 import { redirect } from "next/navigation";
 import requireIntegration from "@/lib/requireIntegration";
 import { prisma } from "@/lib/prisma";
+import type { Provider } from "@prisma/client";
+import { findTransferByUserSrcDest } from "@/lib/transfers/awsTransfers";
 import TransferRunner from "@/components/TransferRunner";
+import Link from "next/link";
 
-export default async function TransferContent( {params}: { params: Promise<{ dest: string, content: string }> } ) {
+export default async function TransferContent( {params}: { params: { dest: Provider, content: Provider } } ) {
     const session = await getServerSession(authOptions);
-    const { dest } = await params;
-    const { content } = await params;
+    const { dest, content } = params;
+    const source = dest;
+    const realDest = content
 
     if (!session) redirect("/api/auth/signin?callbackUrl=%2Ftransfer");
     
@@ -19,10 +23,7 @@ export default async function TransferContent( {params}: { params: Promise<{ des
     const userId = session.user.id;
     await requireIntegration(userId, content, `/transfer/${dest}/${content}/completion`);
 
-    const newTransfer = await prisma.transferDraft.findFirst({
-        where: { userId, source: dest, dest: content },
-        orderBy: { createdAt: "desc"},
-    })
+    const newTransfer = await findTransferByUserSrcDest(userId, source, realDest);
     if (!newTransfer) {
         return (
         <div className="mx-auto max-w-md p-6 text-center">
@@ -30,15 +31,15 @@ export default async function TransferContent( {params}: { params: Promise<{ des
             <p className="mt-2 text-sm text-muted-foreground">
             We couldn&apos;t find a transfer to complete.
             </p>
-            <a className="mt-4 inline-block underline" href={`/transfer/${dest}/${content}`}>
-            Go back
-            </a>
+            <Link className="mt-4 inline-block underline" href={`/transfer/${dest}/${content}`}>
+                Go back
+            </Link>
         </div>
         );
     }
     
 
     return (
-        <TransferRunner transferDraftId={newTransfer.id} dest={content} userId={userId} />
+        <TransferRunner transferDraftId={newTransfer.row.id} dest={content} userId={userId} />
     )
 }
