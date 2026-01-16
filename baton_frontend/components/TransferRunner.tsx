@@ -10,7 +10,7 @@ export default function TransferRunner({ transferDraftId, dest, userId }: Props)
   const router = useRouter();
   const [status, setStatus] = useState<"running"|"success"|"partial"|"failed">("running");
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<{ source: string; dest: string; added: number; unmatched: number, copies: number, destPlaylistName: string, srcPlaylistName: string } | null>(null);
+  const [result, setResult] = useState<{ source: string; dest: string; added: number; unmatched: number, copies: number, destPlaylistName: string | null, srcPlaylistName: string } | null>(null);
 
   useEffect(() => {
     let cancelled = false;

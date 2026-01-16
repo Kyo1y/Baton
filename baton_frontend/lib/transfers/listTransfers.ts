@@ -5,5 +5,5 @@ export default async function listTransfers(userId: string, cursor?: string) {
     if (!res) {
         throw new Error("Could not find transfer history");
     }
-    return res.obj;
+    return res;
 }

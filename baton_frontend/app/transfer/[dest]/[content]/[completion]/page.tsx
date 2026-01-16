@@ -2,7 +2,6 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/auth";
 import { redirect } from "next/navigation";
 import requireIntegration from "@/lib/requireIntegration";
-import { prisma } from "@/lib/prisma";
 import type { Provider } from "@prisma/client";
 import { findTransferByUserSrcDest } from "@/lib/transfers/awsTransfers";
 import TransferRunner from "@/components/TransferRunner";
@@ -40,6 +39,6 @@ export default async function TransferContent( {params}: { params: { dest: Provi
     
 
     return (
-        <TransferRunner transferDraftId={newTransfer.row.id} dest={content} userId={userId} />
+        <TransferRunner transferDraftId={newTransfer.id} dest={content} userId={userId} />
     )
 }

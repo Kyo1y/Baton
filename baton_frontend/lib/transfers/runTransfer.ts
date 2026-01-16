@@ -35,7 +35,7 @@ export async function runTransfer(params: TransferId): Promise<RunTransferResult
         throw new Error("Transfer could not be found");
     }
 
-    const transfer = res.row;
+    const transfer = res;
     if (!transfer) throw new Error("Transfer data was lost. Please try again.");
     const [userId, srcPlaylistId, destPlaylistId, destDraft, srcPlaylistName, destPlaylistName, source, dest] = [
         transfer.userId, transfer.srcPlaylistId, transfer.destPlaylistId, { name: transfer.destDraftName, isPublic: transfer.destDraftIsPublic }, 
