@@ -2,10 +2,11 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/auth";
 import { redirect } from "next/navigation";
 import { listPlaylistsCached } from "@/lib/cachedPlaylists";
+import type { Provider } from "@prisma/client";
 import requireIntegration from "@/lib/requireIntegration";
 import PlaylistPicker from "@/components/PlaylistPicker";
 
-export default async function StepThree( { params }: { params: Promise<{ dest: string, content: string }> } ) {
+export default async function StepThree( { params }: { params: Promise<{ dest: Provider, content: Provider }> } ) {
     const session = await getServerSession(authOptions);
     const { dest } = await params;
     const { content } = await params;
