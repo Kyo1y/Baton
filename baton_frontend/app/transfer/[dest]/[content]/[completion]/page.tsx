@@ -7,9 +7,13 @@ import { findTransferByUserSrcDest } from "@/lib/transfers/awsTransfers";
 import TransferRunner from "@/components/TransferRunner";
 import Link from "next/link";
 
-export default async function TransferContent( {params}: { params: { dest: Provider, content: Provider } } ) {
+type Props = {
+  params: Promise<{ dest: Provider; content: Provider }>;
+};
+
+export default async function TransferContent({ params }: Props ) {
     const session = await getServerSession(authOptions);
-    const { dest, content } = params;
+    const { dest, content } = await params;
     const source = dest;
     const realDest = content
 
