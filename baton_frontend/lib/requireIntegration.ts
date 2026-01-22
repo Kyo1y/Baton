@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
-import { prisma } from "./prisma";
 import { OAUTH } from "@/integrations/providers";
+import { findToken } from "./tokens/tokens";
 
 export const runtime = "nodejs";
 
@@ -8,10 +8,8 @@ export default async function requireIntegration (
     userId: string, provider: string, returnTo: string
 ): Promise<string | void> {
     
-    const token = await prisma.integrationToken.findUnique({
-        where: { userId_provider: { userId, provider } },
-        select: { access_token: true, refresh_token: true, expires_at: true }
-    })
+    const token = await findToken(userId, provider);
+
     if (!token) {
         redirect(`/api/oauth/${provider}/start?return_to=${returnTo}`)
     }

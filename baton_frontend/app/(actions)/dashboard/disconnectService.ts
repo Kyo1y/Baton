@@ -1,9 +1,10 @@
 "use server";
-import { prisma } from "@/lib/prisma";
 import { revalidateTag } from "next/cache";
+import { deleteToken } from "@/lib/tokens/tokens";
+import { deleteProviderProfile } from "@/lib/providerProfile/awsProviderProfile";
 
 export async function disconnectService(id: string, userId: string, provider: string) {
-  await prisma.providerProfile.delete({ where: { id, userId } });
-  await prisma.integrationToken.delete({ where: { userId_provider: {userId, provider} } })
+  await deleteToken(userId, provider);
+  await deleteProviderProfile(userId, provider)
   revalidateTag(`connections:${userId}`);
 }

@@ -2,13 +2,10 @@ import NextAuth from "next-auth";
 import GitHubProvider from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
 import type { NextAuthOptions } from "next-auth";
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import { prisma } from "@/lib/prisma";
 
 export const authOptions: NextAuthOptions = {
-    adapter: PrismaAdapter(prisma),
     secret: process.env.NEXTAUTH_SECRET,
-    session: { strategy: "database" },
+    session: { strategy: "jwt" },
     providers: [
         GitHubProvider({
             clientId: process.env.AUTH_GITHUB_ID!,
@@ -20,9 +17,35 @@ export const authOptions: NextAuthOptions = {
         }),
     ],
     callbacks: {
-        async session({ session, user }) {
+        async jwt({ token, user, account }) {
+            if (!token.batonUserId) {
+                const provider = account?.provider;
+                const providerAccountId = account?.providerAccountId;
+
+                const email = user?.email;
+                const name = user?.name;
+                const image = user?.image;
+
+                if (provider && providerAccountId) {
+                    const res = await fetch(`${process.env.AWS_API_URL}/auth/upsert-user`, {
+                        method: "POST",
+                        headers: {
+                            "content-type": "application/json",
+                            "x-api-key": process.env.AWS_API_KEY!,
+                        },
+                        body: JSON.stringify({ account, email, name, image })
+                    })
+
+                    const data = await res.json();
+                    token.batonUserId = data.userId;
+                }
+            }
+            return token;
+        }
+        ,
+        async session({ session, token }) {
             if (session.user) {
-                (session.user as any).id = user.id;
+                (session.user as any).id = token.batonUserId;
             }
             return session;
         },

@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 
 export async function POST(req: Request) {
     const { userId, provider, accessToken, refreshToken, expiresAt } = await req.json();
+    console.log("HIT /api/tokens", new Date().toISOString());
 
     if (!userId || !provider || !accessToken || !expiresAt) {
         return NextResponse.json({ error: 'Missing fields' }, { status: 400 });

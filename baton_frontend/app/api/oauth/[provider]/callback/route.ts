@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/auth";
-import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { OAUTH } from "@/integrations/providers";
 import { revalidateTag, revalidatePath } from "next/cache";
+import { upsertToken } from "@/lib/tokens/tokens";
+import { findProviderProfile, createProviderProfile } from "@/lib/providerProfile/awsProviderProfile";
 
 export const runtime = "nodejs";
 
@@ -90,9 +91,7 @@ export async function GET(request: Request, { params }: {params: Promise<{ provi
 
     const expires_at = Math.floor(Date.now() / 1000) + (tokenJson.expires_in ?? 3600);
 
-    const profileRow = await prisma.providerProfile.findUnique({
-        where: { userId_provider: { userId, provider } }
-    })
+    const profileRow = await findProviderProfile(userId, provider);
 
     if (profileRow === null) {
         const ytUrl = "https://www.googleapis.com/oauth2/v1/userinfo?alt=json";
@@ -112,40 +111,17 @@ export async function GET(request: Request, { params }: {params: Promise<{ provi
             image: provider == "ytmusic" ? profileJson.picture : profileJson.images[0].url,
             display_name: provider == "ytmusic" ? profileJson.name : profileJson.display_name ?? `${provider} username`,
         }
-        await prisma.providerProfile.create({
-            data: {
-                userId,
-                provider,
-                providerId: profile.id,
-                username: profile.display_name,
-                image: profile.image,
-            }
-        })
+        await createProviderProfile(userId, provider, profile.id, profile.display_name, profile.image);
     }
 
-
-    await prisma.integrationToken.upsert({
-        where: { userId_provider: { userId, provider: provider} },
-        update: {
-            access_token: tokenJson.access_token,
-            refresh_token: tokenJson.refresh_token,
-            expires_at,
-        },
-        create: {
-            userId,
-            provider: provider,
-            access_token: tokenJson.access_token,
-            refresh_token: tokenJson.refresh_token,
-            expires_at,
-        }
-    });
+    await upsertToken(userId, provider, tokenJson.access_token, tokenJson.refresh_token, expires_at);
 
     const res = NextResponse.redirect(new URL(returnTo, url.origin));
     res.cookies.delete(`${provider}_oauth_state`);
     res.cookies.delete(`${provider}_pkce_verifier`);
 
-    await revalidateTag(`connections:${userId}`);
-    await revalidatePath(returnTo);
+    revalidateTag(`connections:${userId}`);
+    revalidatePath(returnTo);
 
     return res;
 }

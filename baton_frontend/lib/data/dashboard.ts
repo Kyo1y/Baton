@@ -9,7 +9,6 @@ export type ConnectionRow = {
   username: string;
   image: string | null;
   createdAt: string; // ISO string
-  
 };
 
 export type TransferRow = {

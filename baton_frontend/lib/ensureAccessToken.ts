@@ -1,36 +1,19 @@
 import { OAUTH } from "@/integrations/providers";
-import { prisma } from "./prisma";
 import { redirect } from "next/navigation";
+import { findToken, updateToken } from "./tokens/tokens";
 
 
 async function readErr(r: Response) {
   try { return await r.json(); } catch { return { error: await r.text() }; }
 }
 
-async function cachedToken( userId: string, provider: string) {
-    const row = await prisma.integrationToken.findUnique({
-        where: { userId_provider: { userId, provider } },
-        select: { access_token: true, refresh_token: true, expires_at: true },
-    });
-    if (!row) {
-        throw new Error("MISSING TOKEN");
-    }
-    const now = Math.floor(Date.now() / 1000);
-    if (row.expires_at > now + 60) return row.access_token;
-}
-
-// ADD REFRESH TOKEN VALIDATOR
 export default async function ensureAccessToken(userId: string, provider: string) {
-    const row = await prisma.integrationToken.findUnique({
-        where: { userId_provider: { userId, provider } },
-        select: { access_token: true, refresh_token: true, expires_at: true },
-    });
-
-    if (!row) {
+    const token = await findToken(userId, provider);
+    if (!token) {
         redirect(`/api/oauth/${provider}/start?return_to=/transfer`);
     }
     const now = Math.floor(Date.now() / 1000);
-    if (row.expires_at > now + 60) return row.access_token;
+    if (token.expires_at > now + 60) return token.access_token;
     const cfg = OAUTH[provider];
     const clientId = cfg.clientId;
     const tokenUrl = cfg.tokenUrl;
@@ -38,7 +21,7 @@ export default async function ensureAccessToken(userId: string, provider: string
     const body = new URLSearchParams({
         client_id: clientId,
         grant_type: "refresh_token",
-        refresh_token: row.refresh_token,
+        refresh_token: token.refresh_token,
     })
 
     if (cfg.clientSecret) {
@@ -61,17 +44,10 @@ export default async function ensureAccessToken(userId: string, provider: string
     }
     const tokenJson = await tokenResp.json() as {access_token: string, refresh_token?: string, expires_in: number}
     const newAccessToken = tokenJson.access_token;
-    const newRefresh = tokenJson.refresh_token ?? row.refresh_token;
+    const newRefresh = tokenJson.refresh_token ?? token.refresh_token;
     const newExpiry = Math.floor(Date.now()/1000) + tokenJson.expires_in;
 
-    await prisma.integrationToken.update({
-        where: {userId_provider: { userId, provider }},
-        data: {
-            access_token: newAccessToken,
-            refresh_token: newRefresh,
-            expires_at: newExpiry,
-        }
-    })
+    await updateToken(userId, provider, newAccessToken, newRefresh, newExpiry);
 
     return newAccessToken;
     
