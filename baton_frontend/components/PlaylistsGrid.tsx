@@ -40,9 +40,9 @@ export default function PlaylistsGrid({
                             className= {clsx(
                                 `rounded-none cursor-pointer border-l-1 border-b-1 border-r-1 border-black border-solid rounded-b-lg bg-white shadow-none
                             hover:bg-[#F3F3F3] w-full md:max-w-[13rem]
-                            z-5 dark:text-white dark:bg-black
+                            z-5 dark:text-white dark:bg-black 
                             `,
-                            isServiceSelected ? "bg-[#F8831E] hover:bg-[#F8831E] text-white" : "bg-transparent"
+                            isServiceSelected ? "bg-[#F8831E] hover:bg-[#F8831E] text-white dark:bg-[#F8831E] dark:hover:bg-[#F8831E]" : "dark:text-white bg-transparent"
                             )} >
                                 <div className="flex items-center w-full">
                                     <Image 
@@ -52,7 +52,7 @@ export default function PlaylistsGrid({
                                         height={30}
                                     />
                                     <div className="flex justify-center w-full">
-                                        <p className={clsx(`truncate w-[90%]`, isServiceSelected ? "text-white" : "text-black")}>{p.name}</p>
+                                        <p className={clsx(`truncate w-[90%]`, isServiceSelected ? "dark:text-white text-white" : "dark:text-white text-black")}>{p.name}</p>
                                     </div>
                                     {isServiceSelected && (
                                         <div onClick={() => setDraftOpen(true)} className="cursor-pointer px-2 z-20 max-h-[20px] max-w-[20px] bg-transparent hover:bg-transparent">
@@ -84,7 +84,7 @@ export default function PlaylistsGrid({
                                 height={30}
                             />
                             <div className="flex justify-center w-full text-black">
-                                <p className={clsx(`truncate w-[90%]`, isServiceSelected ? "text-white dark:text-black" : "dark:text-white text-black")}>{p.name}</p>
+                                <p className={clsx(`truncate w-[90%]`, isServiceSelected ? "text-white dark:text-white" : "dark:text-white text-black")}>{p.name}</p>
                             </div>
                         </div>
                     </Button>
