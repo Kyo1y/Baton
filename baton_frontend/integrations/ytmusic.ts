@@ -153,7 +153,6 @@ export const ytmusicAdapter: MusicAdapter<"ytmusic"> = {
         const url = new URL(`${API}/playlists`);
         url.searchParams.set("part", "snippet, status");
         url.searchParams.set("fields", "id");
-        console.log("PUBLIC PARAM YTMUSIC ADAPTER", publicParam ? "ST: public" : "ST: private")
         const body = {
             snippet: { 
                 title: name,

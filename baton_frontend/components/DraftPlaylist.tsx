@@ -95,7 +95,7 @@ export function DraftPlaylist({
               <Label htmlFor="privacy-1">Privacy</Label>
               <Button
                   type="button"
-                  className={clsx(`cursor-pointer rounded-none px-4 bg-transparent text-black hover:bg-[#F3F3F3]`, isPublic ? `bg-[#F8831E] text-white hover:bg-[#F8831E]` : ``)}
+                  className={clsx(`cursor-pointer rounded-none px-4 bg-transparent text-black dark:bg-[#191919] dark:hover:bg-[#dedede] dark:text-white dark:hover:text-black hover:bg-[#F3F3F3]`, isPublic ? `bg-[#F8831E] dark:hover:text-white dark:hover:bg-[#F8831E] dark:bg-[#F8831E] text-white hover:bg-[#F8831E]` : ``)}
                   aria-pressed={isPublic === true}
                   onClick={() => {setIsPublic(isPublic === true ? null : true)}}
                 >
@@ -103,7 +103,7 @@ export function DraftPlaylist({
                 </Button>
                 <Button
                   type="button"
-                  className={clsx(`cursor-pointer rounded-none px-4 bg-transparent text-black hover:bg-[#F3F3F3]`, isPublic == false ? `bg-[#F8831E] text-white hover:bg-[#F8831E]` : ``)}
+                  className={clsx(`cursor-pointer rounded-none px-4 bg-transparent text-black dark:bg-[#191919] dark:hover:bg-[#dedede] dark:text-white dark:hover:text-black hover:bg-[#F3F3F3]`, isPublic == false ? `bg-[#F8831E] dark:hover:text-white dark:hover:bg-[#F8831E] dark:bg-[#F8831E] text-white hover:bg-[#F8831E]` : ``)}
                   aria-pressed={isPublic === false}
                   onClick={() => {setIsPublic(isPublic === false ? null : false)}}
                 >
