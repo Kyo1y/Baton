@@ -98,7 +98,7 @@ export default function Footer({ links }: {links: NavLink[]}) {
 
         <Separator />
         <div className="flex flex-col-reverse items-center justify-between gap-2 py-6 text-sm text-white md:flex-row">
-          <p>© {new Date().getFullYear()} Baton. No rights reserved.</p>
+          <p>© {new Date().getFullYear()} Baton. All rights reserved.</p>
           <div className="flex items-center gap-4">
             <Link href="/terms" 
               onClick={(e) => {

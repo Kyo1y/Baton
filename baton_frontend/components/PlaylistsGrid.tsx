@@ -38,7 +38,7 @@ export default function PlaylistsGrid({
                         <div key={p.id} className={`flex flex-row`}>
                             <Button  onClick={() => onChange(isServiceSelected ? null : p.id )} 
                             className= {clsx(
-                                `rounded-none cursor-pointer border-l-1 border-b-1 border-r-1 border-black border-solid rounded-b-lg bg-transparent shadow-none
+                                `rounded-none cursor-pointer border-l-1 border-b-1 border-r-1 border-black border-solid rounded-b-lg bg-white shadow-none
                             hover:bg-[#F3F3F3] w-full md:max-w-[13rem]
                             z-5 dark:text-white dark:bg-black
                             `,
@@ -70,11 +70,11 @@ export default function PlaylistsGrid({
                     <Button key={p.id} onClick={() => onChange(isServiceSelected ? null : p.id )} 
                     className= {clsx(
                         `rounded-none cursor-pointer first:rounded-t-lg 
-                    last:rounded-b-lg bg-transparent shadow-none border-l-1 border-r-1 border-b-1 border-black border-solid first:border-t-1
+                    last:rounded-b-lg bg-white shadow-none border-l-1 border-r-1 border-b-1 border-black border-solid first:border-t-1
                     hover:bg-[#F3F3F3] w-full md:max-w-[13rem] md:min-w-[13rem] 
-                    z-5 dark:text-white dark:bg-black
+                    z-5 dark:text-white dark:bg-black text-black
                     `,
-                    isServiceSelected ? "bg-[#F8831E] hover:bg-[#F8831E] text-white" : "bg-transparent"
+                    isServiceSelected ? "bg-[#F8831E] hover:bg-[#F8831E] text-black dark:text-white dark:bg-[#F8831E]" : "bg-white dark:text-white"
                     )} >
                         <div className="flex items-center w-full">
                             <Image 
@@ -83,8 +83,8 @@ export default function PlaylistsGrid({
                                 width={30}
                                 height={30}
                             />
-                            <div className="flex justify-center w-full">
-                                <p className={clsx(`truncate w-[90%]`, isServiceSelected ? "text-white" : "text-black")}>{p.name}</p>
+                            <div className="flex justify-center w-full text-black">
+                                <p className={clsx(`truncate w-[90%]`, isServiceSelected ? "text-white dark:text-black" : "dark:text-white text-black")}>{p.name}</p>
                             </div>
                         </div>
                     </Button>
