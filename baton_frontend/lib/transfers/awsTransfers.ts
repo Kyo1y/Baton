@@ -56,8 +56,10 @@ export async function updateTransfer(
     failed: number,
     copies: number,
 ) {
+    console.log("transferId, status, added, failed, copies")
+    console.log(transferId, status, added, failed, copies)
     return await awsPut<TransferDraft>(
-        "/transfers/update-by-id",
+        "/transfers/update-by-id/upsert",
         { transferId, status, added, failed, copies }
     )
 }

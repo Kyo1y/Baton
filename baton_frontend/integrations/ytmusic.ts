@@ -5,14 +5,39 @@ import makeAltKey from "@/lib/hashKey";
 
 const API = "https://www.googleapis.com/youtube/v3";
 
+function stripNested(s: string, open: string, close: string): string {
+  let out = "";
+  let depth = 0;
+
+  for (const ch of s) {
+    if (ch === open) {
+      depth++;
+      continue;
+    }
+    if (ch === close) {
+      if (depth > 0) depth--;
+      else out += ch; // unmatched close, keep it
+      continue;
+    }
+    if (depth === 0) out += ch;
+  }
+
+  return out;
+}
+
 function normalizeTitle(title: string): string {
-    let s = (title ?? "").normalize("NFKC");  
-    return s.replace(/\s*\([^()]*\)\s*/g, " ")
-    .replace(/\s*\[[^\[\]]*\]\s*/g, " ")
+  let s = (title ?? "").normalize("NFKC");
+
+  // Remove nested (...) then nested [...]
+  s = stripNested(s, "(", ")");
+  s = stripNested(s, "[", "]");
+
+  return s
     .replace(/\s+/g, " ")
     .replace(/\s+([.,;:!?])/g, "$1")
     .trim();
 }
+
 
 function normalizeArtist(artist: string): string {
     let s = (artist ?? "").normalize("NFKC");
@@ -59,7 +84,9 @@ async function addIdToRow(t: Track, access: string, rowId: string): Promise<stri
 }
 
 async function createPair(t: Track, access: string, altKeyParam: string, isrcParam?: string): Promise<string> {
+    console.log("Data used to fetch track",t);
     const track = await ytmusicAdapter.fetchTrack(t, access);
+    console.log(track)
     if (track == false) {
         return "404";
     }
@@ -219,6 +246,7 @@ export const ytmusicAdapter: MusicAdapter<"ytmusic"> = {
                     }
                     // if not, fetch ytmusic ID by that ISRC and add it to the row
                     else {
+                        console.log('Line 222 ytmusic.ts')
                         id = await addIdToRow(t, access, row.canonicalId);
                     }
                 } 
@@ -240,6 +268,7 @@ export const ytmusicAdapter: MusicAdapter<"ytmusic"> = {
                     } 
                     // if not, fetch ytmusic ID by search and add it to the row
                     else {
+                        console.log('Line 244 ytmusic.ts')
                         id = await addIdToRow(t, access, row.canonicalId);
                     }
                 }
@@ -305,12 +334,13 @@ export const ytmusicAdapter: MusicAdapter<"ytmusic"> = {
         const first = data.items[0];
 
         const id = first.id.videoId;
-        const title = first.snippet.title;
-        const artist = normalizeArtist(first.snippet.videoOwnerChannelTitle)
+        const title = normalizeTitle(first.snippet.title);
+        const artist = normalizeArtist(first.snippet.channelTitle)
+        
         return {
             title: title,
-            artists: [artist],
-            isrc: null,
+            artists: [artist == "" ? first.snippet.channelTitle : artist],
+            isrc: t.isrc ?? null,
             durationMs: 0,
             pairs: [{ provider: "ytmusic", id: id}],
             ytmusicId: id,

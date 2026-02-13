@@ -41,3 +41,5 @@ yarn-error.log*
 next-env.d.ts
 
 /lib/generated/prisma
+musicexp-0b8eb2e8fe64.json
+gen-risc-auth-token.mjs

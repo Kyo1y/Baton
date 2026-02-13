@@ -13,7 +13,8 @@ export async function saveTransferDraft(params: {
   destPlaylistName?: string | null,
 }) {
     const { userId, source, dest, srcPlaylistId, destPlaylistId, srcPlaylistName, destDraft, destPlaylistName } = params;
-
+    console.log(`userId, source, dest, srcPlaylistId, destPlaylistId, srcPlaylistName, destDraft, destPlaylistName`)
+    console.log(userId, source, dest, srcPlaylistId, destPlaylistId, srcPlaylistName, destDraft, destPlaylistName)
     if (destDraft) {
       const newTransfer = await createTransfer(userId, source, dest, srcPlaylistId, destPlaylistId, srcPlaylistName, destPlaylistName, destDraft.name, destDraft.isPublic,)
       if (!newTransfer) {

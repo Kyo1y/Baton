@@ -16,7 +16,6 @@ export default function TransferRunner({ transferDraftId, dest, userId }: Props)
     let cancelled = false;
     (async () => {
       try {
-        setStatus("running");
         const res = await finalizeTransfer(transferDraftId);
         if (!res) {
           setStatus("failed");
