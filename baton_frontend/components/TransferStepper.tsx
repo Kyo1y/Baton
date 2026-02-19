@@ -18,7 +18,6 @@ function computeCurrent(pathname: string): number {
   if (depth === 2) return 2;
   if (depth === 3) return 3;
   if (depth === 4) return 4;
-  if (depth >= 5) return 5;
   return 1;
 }
 
@@ -27,20 +26,22 @@ export default function TransferStepper({ override }: { override?: number }) {
   const current = override ?? computeCurrent(pathname);
   const searchParams = useSearchParams();
   let failed = false;
+  let successful = false;
   useEffect(() => {
-    if (searchParams.get("completion") === "failed") {
+    if (searchParams.get("status") === "failed") {
       failed = true;
     }
-
   }, [pathname, searchParams]);
   return (
-    <nav className="mx-auto max-w-5xl px-4 sm:px-6 md:px-8 py-12">
+    <nav className="mx-auto max-w-5xl px-4 sm:px-6 md:px-8 lg:py-12 py-4">
       <ol className="flex flex-wrap items-center gap-4">
         {STEPS.map((label, idx) => {
           const stepNum = idx + 1;
+          console.log(stepNum)
           let isCompleted = stepNum < current;
+          
           let isActive = stepNum === current;
-          if (stepNum == 5) {
+          if (stepNum == 4) {
             isCompleted = true;
             isActive = false;
           }
@@ -90,10 +91,76 @@ export default function TransferStepper({ override }: { override?: number }) {
               {stepNum !== STEPS.length && (
                 <span className="mx-4 h-px w-10 sm:w-16 bg-border" />
               )}
-            </li>
+            </li>            
           );
         })}
       </ol>
+      {/* Mobile */}
+      <div className="lg:hidden" key={"mobile"}>
+
+        {STEPS.map((label, idx) => {
+          const stepNum = idx + 1;
+          console.log(stepNum)
+          let isCompleted = stepNum < current;
+          
+          let isActive = stepNum === current;
+          if (stepNum == 4) {
+            isCompleted = true;
+            isActive = false;
+          }
+          if (isActive) {
+            return (
+            <>
+              <span className="mx-4 h-px w-5 sm:w-16 bg-border" />
+                <span
+                  className={clsx(
+                    "inline-flex size-8 items-center justify-center rounded-full border text-sm font-medium bg-white",
+                    isCompleted &&
+                      "bg-[#F8831E] text-white border-[#F8831E]",
+                    isActive &&
+                      "text-[#F8831E] border-[#F8831E] bg-transparent",
+                    !isCompleted && !isActive &&
+                      "text-muted-foreground border-border"
+                  )}
+                >
+                  { (() => {
+                    if (stepNum == 5) {
+                      if (failed) {
+                        return <X className="size-4 text-[#FF4242]" />
+                      }
+                      else if (isCompleted) {
+                        return <Check className="size-4 text-[#F8831E]" />
+                      }
+                    }
+                    else {
+                      if (isCompleted) {
+                        return <Check className="size-4 text-[#F8831E]" />
+                      }
+                      else {
+                        return stepNum;
+                      }
+                    }
+                  })()}
+                </span>
+              <span className="mx-4 h-px w-5 sm:w-16 bg-border" />
+            </>
+          )
+          } 
+          else if (isCompleted) {
+            { (() => {
+                if (failed) {
+                  return <X className="size-4 text-[#FF4242]" />
+                }
+                else if (isCompleted) {
+                  return <Check className="size-4 text-[#F8831E]" />
+                }
+            })()}
+          }
+        })
+      }
+      </div>
     </nav>
+    
+
   );
 }
