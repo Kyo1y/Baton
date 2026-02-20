@@ -3,7 +3,10 @@
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ArrowRightToLine, TrendingUpDown, Check } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
 
 type Payload = {
     status: "success" | "partial" | "failed",
@@ -55,31 +58,59 @@ function SuccessView({ source, dest, result, note }: {
   note?: string 
 }) {
   return (
-    <div>
-      <h1 className="text-2xl font-semibold">Transfer complete</h1>
-      {note && <p className="mt-1 text-sm text-muted-foreground">{note}</p>}
-      <h2>{result.srcPlaylistName} → {result.destPlaylistName}</h2>
-      <div className="flex items-center">
-        <div className="">
-            <Image
-            src={`/logos/${source}.svg`}
-            alt={source}
-            width={25}
-            height={25}
-            />
+    <div className="flex flex-col items-center">
+      <div className="flex flex-col dark:bg-black bg-white rounded-lg w-50% z-10 p-5 border-1 border-[#F8831E]">
+        <h1 className="text-3xl font-bold text-[#43B929]">Transfer complete</h1>
+        {note && <p className="mt-1 text-sm text-muted-foreground">{note}</p>}
+        <div className="flex items-center gap-0.5">
+          <div className="flex items-center gap-0.5">
+            <div className="border-1 rounded-lg p-1">
+              <Image
+              src={source === "ytmusic" ? `/logos/youtube-music.svg` : `/logos/${source}.svg`}
+              alt={source}
+              width={25}
+              height={25}
+              />
+            </div>
+            <h2 className="text-2xl">{result.srcPlaylistName}</h2>
+          </div>
+          <h2 className="text-2xl ">→</h2>
+          <div className="flex items-center gap-0.5">
+            <div className="border-1 rounded-lg p-1">
+              <Image
+              src={dest === "ytmusic" ? `/logos/youtube-music.svg` : `/logos/${source}.svg`}
+              alt={dest}
+              width={25}
+              height={25}
+              />
+            </div>
+              <h2 className="text-2xl">{result.destPlaylistName}</h2>
+          </div>
         </div>
-        <h2>→</h2>
-        <div>
-            <Image
-            src={`/logos/${dest}.svg`}
-            alt={dest}
-            width={25}
-            height={25}
-            />
-        </div>
+        <p className="mt-4 flex gap-0.5 text-xl items-center">
+          <Check color="#43B929"/>
+          Added {result.added} tracks
+          </p>
+        <p className="mt-4 flex gap-0.5 text-xl items-center">
+          <TrendingUpDown color="#FF4242"/>
+          Unmatched: {result.unmatched}
+        </p>
+        <p className="mt-4 flex gap-0.5 text-xl items-center">
+          <ArrowRightToLine color="#6e6e6e"/>
+          Copies avoided: {result.copies}
+        </p>
+        <Button asChild className="mt-4 group bg-[#F8831E] hover:bg-[#FF8E2C] gap-1">
+            <Link href="/transfer">
+                Start Another
+                <span
+                    aria-hidden="true"
+                    className="ml-1 inline-block transition-transform group-hover:translate-x-1"
+                >
+                    →
+                </span>
+            </Link>
+        </Button>
       </div>
-      <p className="mt-4">Added {result.added} tracks. Unmatched: {result.unmatched}. Copies avoided: {result.copies}</p>
-      <a className="mt-4 inline-block underline" href={`/transfer`}>Start another</a>
     </div>
   );
 }
