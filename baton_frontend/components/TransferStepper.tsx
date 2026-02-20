@@ -26,7 +26,6 @@ export default function TransferStepper({ override }: { override?: number }) {
   const current = override ?? computeCurrent(pathname);
   const searchParams = useSearchParams();
   let failed = false;
-  let successful = false;
   useEffect(() => {
     if (searchParams.get("status") === "failed") {
       failed = true;
