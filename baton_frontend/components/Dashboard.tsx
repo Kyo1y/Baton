@@ -7,7 +7,7 @@ import { Unlink, Link } from "lucide-react";
 import { SERVICES } from "@/lib/services";
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import loadTransfers from "@/app/(actions)/dashboard/loadTransfers";
 
 
@@ -49,7 +49,7 @@ const formatDate = (d: Date | string) =>
         minute: "2-digit",
     });
 
-export function TransfersTable({ transfers }: { transfers: Props["transfers"] }) {
+export function TransfersTable({ transfers, scrollRef }: { transfers: Props["transfers"], scrollRef: React.RefObject<HTMLDivElement | null> }) {
   if (!transfers?.length) {
     return (
       <div className="rounded-lg border p-6 text-sm text-muted-foreground ">
@@ -71,6 +71,7 @@ export function TransfersTable({ transfers }: { transfers: Props["transfers"] })
             !z-1
             max-w-[80vw]
             "
+            ref={scrollRef}
         >
             <table className="w-full table-fixed border-collapse text-sm !z-1">
                 <thead className="bg-gray-50 dark:bg-black sticky top-0 z-3 ">
@@ -117,43 +118,69 @@ export default function Dashboard({ services, transfers, initialCursor, userId, 
     const router = useRouter();
     const connected = useMemo(() => new Set(services.map(s => s.provider)), [services]);
     const disconnected = useMemo(() => SERVICES.map((s) => s.slug).filter(p => !connected.has(p)), [connected]);
-
+    const tableContainerRef = useRef<HTMLDivElement>(null);
     const handleConnect = (provider: string) => {
         router.push(`/api/oauth/${provider}/start?return_to=/dashboard`);
     };
 
-    const [items, setItems] = useState(transfers);
     const [cursor, setCursor] = useState(initialCursor);
     const [loading, setLoading] = useState(false);
-    const [canShowLess, setCanShowLess] = useState(!(items.length <= 10));
 
-    async function loadMore() {
-        if (!cursor || loading) return;
-        setLoading(true);
-        setCanShowLess(true);
-        try {
-            const res = await loadTransfers({ userId, cursor, });
-            setItems(prev => [...prev, ...res.items])
-            setCursor(res.nextCursorCreatedAt);
-        } finally {
-            setLoading(false);
+    const [masterItems, setMasterItems] = useState(transfers); 
+
+    const [visibleCount, setVisibleCount] = useState(transfers.length);
+
+    const visibleItems = masterItems.slice(0, visibleCount);
+    const canShowLess = visibleCount > 10; 
+    const canShowMore = Boolean(cursor) || visibleCount < masterItems.length;
+
+    function triggerScrollNudge(up: boolean) {
+        if (up) {
+            setTimeout(() => {
+                if (tableContainerRef.current) {
+                tableContainerRef.current.scrollBy({
+                    top: 100, 
+                    behavior: 'smooth' 
+                });
+                }
+            }, 50);
+        }
+        else {
+            setTimeout(() => {
+                if (tableContainerRef.current) {
+                tableContainerRef.current.scrollBy({
+                    top: -100, 
+                    behavior: 'smooth' 
+                });
+                }
+            }, 50);
         }
     }
-    function showLess() {
-        if (items.length <= 10 || loading) return;
-        setLoading(true);
-        const sliceRange = items.length % 10 == 0 ? items.length - 10 : items.length - (items.length % 10);
-        const newCursorDate = items.length % 10 == 0 ? items[items.length - 11].createdAt : items[items.length - (items.length % 10)].createdAt;
-        const newCursor = formatDate(newCursorDate);
-        const shortenedItems = items.slice(0, sliceRange);
-        setItems(shortenedItems);
-        setCursor(newCursor);
-        setLoading(false);
-        if (shortenedItems.length <= 10) {
-            setCanShowLess(false);
-        }
+
+    async function loadMore() {
+    if (visibleCount < masterItems.length) {
+        setVisibleCount((prev) => prev + 10);
+        triggerScrollNudge(true);
         return;
-        
+    }
+
+    if (!cursor || loading) return;
+    setLoading(true);
+    try {
+        const res = await loadTransfers({ userId, cursor });
+        setMasterItems((prev) => [...prev, ...res.items]);
+        setVisibleCount((prev) => prev + res.items.length);
+        setCursor(res.nextCursorCreatedAt);
+
+        triggerScrollNudge(true);
+    } finally {
+        setLoading(false);
+    }
+    }
+
+    function showLess() {
+        setVisibleCount((prev) => Math.max(10, prev % 10 == 0 ? prev - 10 : prev - (prev % 10))); 
+        triggerScrollNudge(false);
     }
     
     return (
@@ -243,21 +270,21 @@ export default function Dashboard({ services, transfers, initialCursor, userId, 
                     className="flex flex-col gap-7"
                 >
                     <h1 className="text-2xl font-bold">History</h1>
-                    <TransfersTable transfers={items} />
+                    <TransfersTable transfers={visibleItems} scrollRef={tableContainerRef}/>
                     <div
                         className="flex justify-end gap-5 w-[100%]"
                     >
                         <Button
                         onClick={loadMore}
-                        disabled={!cursor || loading}
+                        disabled={!canShowMore || loading}
                         className="cursor-pointer bg-[#F8831E] hover:bg-[#FF9538] disabled:opacity-[0.6]"
                         >
-                            {loading ? "Loading..." : cursor ? "Load more" : "No more"}
+                            {loading ? "Loading..." : canShowMore ? "Load more" : "No more"}
                         </Button>
                         <Button
                         disabled={!canShowLess || loading}
                         onClick={showLess}
-                        className="cursor-pointer bg-[#3f3f3f] hover:bg-[#505050] disabled:opacity-[0.6] dark:bg-[#7C7C7C] dark:hover:bg-[#979797]"
+                        className="cursor-pointer bg-[#3f3f3f] hover:bg-[#505050] disabled:opacity-[0.6] dark:bg-[#EEF0F2] dark:hover:bg-[#979797]"
                         >
                             Show less
                         </Button>
