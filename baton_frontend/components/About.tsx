@@ -1,8 +1,11 @@
 "use client"
 
 import Link from "next/link";
+import { usePageTransition } from "./TransitionProvider";
+
 
 export default function About() {
+    const { startTransition } = usePageTransition();
     return (
         <section
             id="about"
@@ -38,8 +41,12 @@ export default function About() {
                         here.
                     </Link>
                     <br /><br />
-                    I hope you enjoy it but if you encounter any issues, please let me know! <Link href={"/contact"} 
+                    I hope you enjoy it but if you encounter any issues, please let me know!  <Link href={"/contact"} 
                     className="underline decoration-dotted"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      startTransition("/contact");
+                    }}
                     >
                         Contacts.
                     </Link>
