@@ -1,7 +1,6 @@
-"use client"
-
 import Contacts from "@/components/Contacts"
 import type { Metadata } from "next";
+
 export const metadata: Metadata = {
   title: "Contacts", 
 };
