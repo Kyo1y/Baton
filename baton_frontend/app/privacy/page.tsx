@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | Baton",
+  title: "Privacy Policy",
   description: "Privacy Policy for the Baton playlist transfer app.",
 };
 

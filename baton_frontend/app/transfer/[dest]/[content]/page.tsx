@@ -5,6 +5,22 @@ import { listPlaylistsCached } from "@/lib/cachedPlaylists";
 import type { Provider } from "@prisma/client";
 import requireIntegration from "@/lib/requireIntegration";
 import PlaylistPicker from "@/components/PlaylistPicker";
+import type { Metadata } from "next";
+
+type Props = {
+  params: Promise<{ dest: Provider, content: Provider }>;
+};
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+    const { dest } = await params;
+    const { content } = await params;
+    const sourceService = dest === "spotify" ? "Spotify" : "YouTube Music";
+    const destService = content === "spotify" ? "Spotify" : "YouTube Music";
+
+    return {
+        title: `${sourceService} → ${destService}`, 
+    };
+}
 
 export default async function StepThree( { params }: { params: Promise<{ dest: Provider, content: Provider }> } ) {
     const session = await getServerSession(authOptions);

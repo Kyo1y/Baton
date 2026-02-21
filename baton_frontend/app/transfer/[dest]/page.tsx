@@ -3,6 +3,20 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/auth"
 import ServicePicker from "@/components/ServicePicker";
+import type { Metadata } from "next";
+
+type Props = {
+    params: Promise<{ dest: string }>;
+};
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+    const { dest } = await params;
+    const sourceService = dest === "spotify" ? "Spotify" : "YouTube Music";
+
+    return {
+        title: `${sourceService} → ...`, 
+    };
+}
 
 export default async function StepTwo({ params } : { params: Promise<{ dest: string }> }) {
     const session = await getServerSession(authOptions);

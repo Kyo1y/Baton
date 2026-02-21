@@ -7,9 +7,18 @@ import Footer from "@/components/Footer";
 import VantaDotsBackground from "@/components/vantaEffects/VantaDots";
 import { TransitionProvider } from "@/components/TransitionProvider";
 import { ThemeProvider } from "@/components/theme/theme-provider";
+import type { Metadata } from "next";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
+
+export const metadata: Metadata = {
+  title: {
+    template: "%s",
+    default: "Baton - Transfer Playlists Seamlessly",
+  },
+  description: "Transfer your playlists between Spotify, YouTube Music, and more.",
+};
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authOptions);

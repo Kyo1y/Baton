@@ -5,8 +5,13 @@ import { authOptions } from "@/auth";
 import { getConnections } from "@/lib/data/dashboard";
 import { disconnectService } from "../(actions)/dashboard/disconnectService";
 import listTransfers from "@/lib/transfers/listTransfers";
+import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Dashboard", 
+};
 
 export default async function DashboardPage() {
     const session = await getServerSession(authOptions);

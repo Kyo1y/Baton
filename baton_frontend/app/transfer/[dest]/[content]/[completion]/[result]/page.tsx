@@ -5,8 +5,15 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRightToLine, TrendingUpDown, Check } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import type { Metadata } from "next";
+
+export async function generateMetadata(): Promise<Metadata> {
+    return {
+        title: `Transfer Finished`, 
+    };
+}
 
 type Payload = {
     status: "success" | "partial" | "failed",

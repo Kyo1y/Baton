@@ -6,10 +6,37 @@ import type { Provider } from "@prisma/client";
 import { findTransferByUserSrcDest } from "@/lib/transfers/awsTransfers";
 import TransferRunner from "@/components/TransferRunner";
 import Link from "next/link";
+import { cache } from "react"; // 1. Import React cache
+import type { Metadata } from "next";
 
 type Props = {
   params: Promise<{ dest: Provider; content: Provider }>;
 };
+
+// This ensures that even if we call DB twice, it only executes one DB query per page load.
+const getCachedTransfer = cache(async (userId: string, source: Provider, realDest: Provider) => {
+  return await findTransferByUserSrcDest(userId, source, realDest);
+});
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const session = await getServerSession(authOptions);
+  const { dest: source, content: realDest } = await params;
+
+    const sourceName= source === "spotify" ? "Spotify" : "YouTube Music";
+    const destName= realDest === "spotify" ? "Spotify" : "YouTube Music";
+
+  if (!session?.user?.id) {
+    return { title: `${sourceName} -> ${destName}` };
+  }
+
+  const transfer = await getCachedTransfer(session.user.id, source, realDest);
+
+  if (transfer) {
+    return { title: `${sourceName} -> ${destName}: ${transfer.srcPlaylistName} -> ${transfer.destPlaylistName}` };
+  }
+
+  return { title: `${sourceName} -> ${destName}` };
+}
 
 export default async function TransferContent({ params }: Props ) {
     const session = await getServerSession(authOptions);
@@ -26,7 +53,7 @@ export default async function TransferContent({ params }: Props ) {
     const userId = session.user.id;
     await requireIntegration(userId, content, `/transfer/${dest}/${content}/completion`);
 
-    const newTransfer = await findTransferByUserSrcDest(userId, source, realDest);
+    const newTransfer = await getCachedTransfer(userId, source, realDest);
     if (!newTransfer) {
         return (
         <div className="mx-auto max-w-md p-6 text-center">
