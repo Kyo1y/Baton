@@ -37,7 +37,7 @@ export default function DemoPage() {
         <Button 
           variant="outline" 
           onClick={handleRestart}
-          className="gap-2 z-10 cursor-pointer !bg-[#151515] group"
+          className="gap-2 z-10 cursor-pointer dark:bg-[#151515]! group"
           onMouseEnter={() => setIsSpinning(true)}
         >
           <RotateCcw 

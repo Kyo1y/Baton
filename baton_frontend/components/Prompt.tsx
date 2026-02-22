@@ -1,8 +1,13 @@
 "use client"
 import Link from "next/link"
 import { Button } from "./ui/button"
+import { usePageTransition } from "./TransitionProvider";
+
+
 
 export default function Prompt() {
+    const { startTransition } = usePageTransition();
+
     return (
         <section
             id="prompt"
@@ -30,7 +35,12 @@ export default function Prompt() {
                     className="flex gap-5"
                     >
                         <Button asChild className="group bg-[#F8831E] hover:bg-[#FF8E2C] gap-1">
-                            <Link href="/transfer">
+                            <Link href="/transfer"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    startTransition("/transfer");
+                                }}
+                            >
                                 Start Transfer
                                 <span
                                     aria-hidden="true"
