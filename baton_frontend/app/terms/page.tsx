@@ -311,7 +311,7 @@ export default function TermsPage() {
             You are responsible for maintaining the security of your login
             credentials and for all activity under your account. If you suspect that
             your account or data has been compromised, you should notify us
-            immediately at <strong>[your-email@example.com]</strong>.
+            immediately at <strong>sadyrbekov.kairat@gmail.com</strong>.
           </p>
           <p>
             Where required by applicable law, if we become aware of a security
