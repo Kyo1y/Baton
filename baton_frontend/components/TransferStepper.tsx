@@ -36,7 +36,6 @@ export default function TransferStepper({ override }: { override?: number }) {
       <ol className="flex flex-wrap items-center gap-4">
         {STEPS.map((label, idx) => {
           const stepNum = idx + 1;
-          console.log(stepNum)
           let isCompleted = stepNum < current;
           
           let isActive = stepNum === current;
@@ -99,7 +98,6 @@ export default function TransferStepper({ override }: { override?: number }) {
 
         {STEPS.map((label, idx) => {
           const stepNum = idx + 1;
-          console.log(stepNum)
           let isCompleted = stepNum < current;
           
           let isActive = stepNum === current;
@@ -110,7 +108,7 @@ export default function TransferStepper({ override }: { override?: number }) {
           if (isActive) {
             return (
             <>
-              <span className="mx-4 h-px w-5 sm:w-16 bg-border" />
+              <span className="mx-4 h-px w-5 sm:w-16 bg-border" key={label}/>
                 <span
                   className={clsx(
                     "inline-flex size-8 items-center justify-center rounded-full border text-sm font-medium bg-white",
@@ -148,10 +146,10 @@ export default function TransferStepper({ override }: { override?: number }) {
           else if (isCompleted) {
             { (() => {
                 if (failed) {
-                  return <X className="size-4 text-[#FF4242]" />
+                  return <X className="size-4 text-[#FF4242]" key={label} />
                 }
                 else if (isCompleted) {
-                  return <Check className="size-4 text-[#F8831E]" />
+                  return <Check className="size-4 text-[#F8831E]" key={label}/>
                 }
             })()}
           }
