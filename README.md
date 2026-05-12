@@ -2,6 +2,11 @@
 
 A web app for transferring playlists between **Spotify** and **YouTube Music**.
 
+
+![main_page_light](https://github.com/Kyo1y/Baton/blob/main/Baton_Main_Page_Light.png?raw=true)
+![main_page_dark](https://github.com/Kyo1y/Baton/blob/main/Baton_Main_Page_Dark.png?raw=true)
+
+
 ---
 
 ## Features
