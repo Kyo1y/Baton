@@ -1,4 +1,4 @@
-# Baton
+# [Baton](https://www.batonnn.com)
 
 A web app for transferring playlists between **Spotify** and **YouTube Music**.
 
@@ -111,8 +111,9 @@ OPENAI_API_KEY=
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3000](http://localhost:3000)
 
+...or visit [batonnn.com](https://www.batonnn.com).
 ---
 
 ## Scripts

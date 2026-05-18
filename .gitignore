@@ -10,3 +10,4 @@ venv
 .vscode
 myenv
 node_modules
+/baton_telegram
